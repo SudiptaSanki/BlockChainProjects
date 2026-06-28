@@ -1,0 +1,23 @@
+﻿{
+  "name": "17-yieldanchor-level-2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "vite --host 0.0.0.0", "build": "vite build", "preview": "vite preview", "test:local": "node test.cjs" },
+  "dependencies": {
+    "@stellar/freighter-api": "latest",
+    "@stellar/stellar-sdk": "latest",
+    "@stellar/wallets-kit": "latest",
+    "@vitejs/plugin-react": "latest",
+    "framer-motion": "latest",
+    "vite": "latest",
+    "vite-plugin-node-polyfills": "latest",
+    "typescript": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "tailwindcss": "latest",
+    "postcss": "latest",
+    "autoprefixer": "latest"
+  },
+  "devDependencies": {}
+}
