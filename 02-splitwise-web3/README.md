@@ -68,15 +68,13 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### 1. Wallet Options Available (MetaMask, Freighter, etc.)
-![Wallet Options](./level-2-yellow-belt/screenshots/wallet-options.png)
+![Level 2 Contract Call](./screenshots/level2_transaction_splitwise_web3.png)
 
 #### 2. Deployed Contract Address
 - **Contract ID:** `CC3RSPLITWISEVAULT...TESTNET` (Replace with your actual contract)
-![Contract Address](./level-2-yellow-belt/screenshots/contract-address.png)
 
 #### 3. Transaction Hash (MetaMask Testnet Transaction)
 - **Tx Hash:** *(Replace with your hash)*
-![Transaction Hash](./level-2-yellow-belt/screenshots/transaction-hash.png)
 
 #### 4. Live Demo Link
 - **Live Demo:** *(Replace with Vercel/Netlify link)*

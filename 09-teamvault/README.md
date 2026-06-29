@@ -38,7 +38,7 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./level-1-white-belt/screenshots/Teamvault%20-%20Level%201.png)
+![Level 1 Submission Screenshot](./screenshots/level1_teamvault.png)
 
 ---
 
@@ -72,7 +72,7 @@ The repository is organized into progressive levels:
 
 #### 2. Deployed Contract Address & Call
 - **Contract ID:** `CC3RTEAMVAULTVAULT...TESTNET` (Replace with your actual contract)
-![Contract Call](./level-2-yellow-belt/screenshots/Teamvault%20-%20Level%202%20-%20Transaction%20Hash.png)
+![Level 2 Contract Call](./screenshots/level2_transaction_teamvault.png)
 
 #### 3. Transaction Hash (MetaMask Testnet Transaction)
 - **Tx Hash:** *(Replace with your hash)*

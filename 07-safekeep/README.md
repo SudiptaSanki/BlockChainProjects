@@ -38,7 +38,7 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./level-1-white-belt/screenshots/Safekeep%20Level%201.png)
+![Level 1 Submission Screenshot](./screenshots/level1_safekeep.png)
 
 ---
 
@@ -72,7 +72,7 @@ The repository is organized into progressive levels:
 
 #### 2. Deployed Contract Address & Call
 - **Contract ID:** `CC3RSAFEKEEPVAULT...TESTNET` (Replace with your actual contract)
-![Contract Call](./level-2-yellow-belt/screenshots/Safekeep%20Level%202%20transaction%20hash.png)
+![Level 2 Contract Call](./screenshots/level2_transaction_safekeep.png)
 
 #### 3. Transaction Hash (MetaMask Testnet Transaction)
 - **Tx Hash:** *(Replace with your hash)*
