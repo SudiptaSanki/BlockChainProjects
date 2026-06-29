@@ -85,8 +85,8 @@ graph TD
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/level2_agentpay.png)
+#### Admin CLI Identity & Budget Approval (Level 2 Console)
+![Level 2 Budget Console](./screenshots/level2_agentpay.png)
 
 #### Deployed Smart Contract Called & Spend Limit Activated
-![Level 2 Contract Call](./screenshots/level2transactions_agentpay.png)
+![Level 2 Transaction Confirmation](./screenshots/level2_agentpay.png)
