@@ -52,7 +52,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/StellarScribe_Level_1.png)
+![Level 1 Submission Screenshot](./screenshots/stellarscribe_level_1.png)
 
 ---
 
@@ -85,8 +85,5 @@ graph TD
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/StellarScribe_1_Level_2.png)
-
-#### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/StellarScribe_transaction_Level_2.png)
+#### Deployed Smart Contract Called, Event Logger Sync, & Successful Transaction
+![Level 2 Audit Submission & Smart Contract Call](./screenshots/stellarscribe_success_trans_level_2.png)

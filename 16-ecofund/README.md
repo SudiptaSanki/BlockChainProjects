@@ -52,7 +52,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/EcoFund_Level_1.png)
+![Level 1 Submission Screenshot](./screenshots/level1_EcoFund.png)
 
 ---
 
@@ -86,7 +86,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/EcoFund_1_Level_2.png)
+![Level 2 Available Wallets](./screenshots/level2_EcoFund.png)
 
 #### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/EcoFund_transaction_Level_2.png)
+![Level 2 Contract Call](./screenshots/level2transactions_EcoFund.png)
