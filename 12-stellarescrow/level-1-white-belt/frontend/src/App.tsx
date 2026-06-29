@@ -480,7 +480,7 @@ export default function App() {
 
         {/* Footer */}
         <footer className="py-8 border-t border-stone-800/40 text-center text-xs text-stone-500">
-          © 2026 {project.title} - Stellar Soroban Escrow Systems
+          Stellar Soroban Developer Sandbox — Testing & Verification Environment
         </footer>
       </div>
     </div>

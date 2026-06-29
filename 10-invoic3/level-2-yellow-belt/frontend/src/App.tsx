@@ -604,7 +604,7 @@ export default function App() {
 
         {/* Footer */}
         <footer className="py-6 border-t border-stone-800/40 text-center text-xs text-stone-500">
-          © 2026 {project.short} Console - Stellar Soroban Level 2 Control Center
+          Stellar Soroban Developer Sandbox — Testing & Verification Environment
         </footer>
       </div>
     </div>
