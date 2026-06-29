@@ -53,7 +53,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/leve1_Gift3r.png)
+![Level 1 Submission Screenshot](./screenshots/level1_Gift3r.png)
 
 ---
 
