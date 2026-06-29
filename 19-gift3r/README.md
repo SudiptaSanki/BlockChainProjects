@@ -13,6 +13,21 @@ The repository is organized into progressive levels:
 
 ---
 
+## ⚙️ Gift3r Architecture Workflow
+
+```mermaid
+graph TD
+    A[Gift Sender] -->|Connect Freighter / MetaMask| B(Gift3r Interface)
+    B -->|Define XLM Amount & Note| C{Verify Balances}
+    C -->|Available| D[Build Payment Transaction]
+    D -->|Request Extension Sign| E[Wallet Approves Tx]
+    E -->|Horizon Submission| F[(Stellar Blockchain)]
+    F -->|Voucher Vault Lock| G[Unique Pre-paid Voucher Code]
+    G -->|Share Link| H[Recipient Redeems Gift Value]
+```
+
+---
+
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
@@ -38,7 +53,7 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/Gift3r_Level_1.png)
+![Level 1 Submission Screenshot](./screenshots/leve1_Gift3r.png)
 
 ---
 
@@ -71,8 +86,5 @@ The repository is organized into progressive levels:
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/Gift3r_1_Level_2.png)
-
-#### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/Gift3r_transaction_Level_2.png)
+#### Available Wallet Options & Payout Transactions
+![Level 2 Available Wallets](./screenshots/level2_Gift3r.png)
