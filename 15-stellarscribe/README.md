@@ -52,7 +52,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/stellarscribe_level_1.png)
+![Level 1 Submission Screenshot](./screenshots/level1_stellarscribe.png)
 
 ---
 
@@ -86,4 +86,4 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Deployed Smart Contract Called, Event Logger Sync, & Successful Transaction
-![Level 2 Audit Submission & Smart Contract Call](./screenshots/stellarscribe_success_trans_level_2.png)
+![Level 2 Audit Submission & Smart Contract Call](./screenshots/level2_transaction_stellarscribe.png)

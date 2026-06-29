@@ -86,4 +86,4 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Deployed Smart Contract Called, Event Logger Sync, & Successful Transaction
-![Level 2 Split Submission & Smart Contract Call](./screenshots/level2_transactions_billsplitter_ai.png)
+![Level 2 Split Submission & Smart Contract Call](./screenshots/level2_transaction_billsplitter_ai.png)

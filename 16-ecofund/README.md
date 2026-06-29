@@ -89,4 +89,4 @@ graph TD
 ![Level 2 Available Wallets](./screenshots/level2_EcoFund.png)
 
 #### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/level2transactions_EcoFund.png)
+![Level 2 Contract Call](./screenshots/level2_transaction_EcoFund.png)

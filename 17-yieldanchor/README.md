@@ -54,7 +54,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/level%201_YieldAnchor.png)
+![Level 1 Submission Screenshot](./screenshots/level1_YieldAnchor.png)
 
 ---
 
@@ -88,4 +88,4 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options & Pool Allocations
-![Level 2 Available Wallets & Pool Allocations](./screenshots/level%202%20trans_YieldAnchor.png)
+![Level 2 Available Wallets & Pool Allocations](./screenshots/level2_transaction_YieldAnchor.png)

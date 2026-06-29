@@ -246,7 +246,7 @@ export default function App() {
       <aside className="w-80 light-sidebar flex flex-col justify-between p-8 shrink-0 z-40">
         <div className="flex flex-col gap-10">
           <div className="flex items-center gap-3 border-b border-stone-200 pb-6">
-            <img src="/favicon.svg" alt="TokenVest Logo" className="w-10 h-10 object-contain filter drop-shadow" />
+            <img src="/tokenvest-icon.svg" alt="TokenVest Logo" className="w-10 h-10 object-contain filter drop-shadow" />
             <div>
               <h1 className="font-bold text-2xl tracking-wide text-stone-900 leading-none">
                 {project.short}

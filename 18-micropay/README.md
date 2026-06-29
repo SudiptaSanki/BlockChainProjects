@@ -54,7 +54,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/Level%201_micropay%20hub.png)
+![Level 1 Submission Screenshot](./screenshots/level1_micropay.png)
 
 ---
 
@@ -88,4 +88,4 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options & Stream Allocations
-![Level 2 Available Wallets & Stream Allocations](./screenshots/Level%202trans_micropay%20hub.png)
+![Level 2 Available Wallets & Stream Allocations](./screenshots/level2_transaction_micropay.png)

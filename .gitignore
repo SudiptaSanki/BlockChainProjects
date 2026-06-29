@@ -7,3 +7,11 @@
 /level*_Gift3r.png
 /level*_YieldAnchor.png
 /level*_micropay.png
+
+# Ignore planning and project browser scripts
+/fix_20_projects.py
+/PROJECT_BROWSER.html
+/stellar_hackathon_prompt.md
+/stellar_project_ideas.md
+/PROJECT_SCAFFOLD_PLAN.md
+/open-project-browser.bat
