@@ -52,7 +52,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Split Transaction
-![Level 1 Submission Screenshot](./screenshots/level1_billsplitter.png)
+![Level 1 Submission Screenshot](./screenshots/level1_billsplitter_ai.png)
 
 ---
 
@@ -81,12 +81,9 @@ graph TD
 
 ### ⚙️ Verification Details
 - **Deployed Contract Address:** `CC3RBILLSPLITTER...`
-- **Transaction Hash (Stellar Explorer):** `c45ef88cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38c4b`
+- **Transaction Hash (Stellar Explorer):** `c45ef88tribe...`
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/level2_billsplitter.png)
-
-#### Deployed Smart Contract Called & Settle Split Success
-![Level 2 Contract Call](./screenshots/level2transactions_billsplitter.png)
+#### Deployed Smart Contract Called, Event Logger Sync, & Successful Transaction
+![Level 2 Split Submission & Smart Contract Call](./screenshots/level2_transactions_billsplitter_ai.png)
