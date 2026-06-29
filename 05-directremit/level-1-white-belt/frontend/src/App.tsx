@@ -485,7 +485,7 @@ export default function App() {
         </main>
 
         <footer className="py-8 border-t border-stone-900/60 text-center text-xs text-stone-600 font-mono">
-          STELLAR SOROBAN PROTOCOL // SECURE WORKSPACE NODE
+          STELLAR SOROBAN PROTOCOL // CROSS-BORDER SETTLEMENT
         </footer>
       </div>
     </div>
