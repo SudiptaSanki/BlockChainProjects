@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Tangerine:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-stone-900 text-stone-100 antialiased min-h-screen;
+    font-family: 'Cormorant Garamond', serif;
+  }
+  h1, h2, h3, h4, .font-lux {
+    font-family: 'Cormorant Garamond', serif;
+  }
+}
+
+.font-calligraphy {
+  font-family: 'Tangerine', cursive;
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+/* Picture background style with dark luxury overlay */
+.pic-bg-overlay {
+  background-image: linear-gradient(to right, rgba(22, 18, 15, 0.95), rgba(22, 18, 15, 0.7)), url('/bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+/* Light Left Sidebar styling */
+.light-sidebar {
+  @apply bg-[#fcfaf7]/95 text-stone-800 border-r border-stone-200/60 shadow-lg backdrop-blur-md;
+}
+
+/* Luxury card overlays */
+.luxury-card {
+  background: rgba(32, 28, 25, 0.75);
+  border: 1px solid rgba(245, 158, 11, 0.15); /* amber-500 */
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  @apply backdrop-blur-md;
+}
+
+.luxury-input {
+  background: rgba(18, 14, 12, 0.6);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  transition: all 0.3s ease;
+}
+.luxury-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+  outline: none;
+}
