@@ -77,10 +77,6 @@ graph TD
    npm run dev
    ```
 
-### ⚙️ Verification Details
-- **Deployed Contract Address:** `CC1VESTAPAYROLL...`
-- **Transaction Hash (Stellar Explorer):** `c88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
-
 ### 📸 Submission Screenshots
 
 #### Deployed Contract Called & Transaction Result
