@@ -65,6 +65,9 @@ The repository is organized into progressive levels:
    npm run dev
    ```
 
+### ⚙️ Verification Details
+Testnet (CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)

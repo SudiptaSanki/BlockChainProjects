@@ -79,6 +79,9 @@ graph TD
    npm run dev
    ```
 
+### ⚙️ Verification Details
+Testnet (CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+
 ### 📸 Submission Screenshots
 
 #### Admin CLI Identity & Budget Approval (Level 2 Console)

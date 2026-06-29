@@ -84,6 +84,9 @@ graph TD
 - **Deployed Contract Address:** `CC3RINVOIC3VAULT...`
 - **Transaction Hash (Stellar Explorer):** `d88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
 
+### ⚙️ Verification Details
+Testnet (CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+
 ### 📸 Submission Screenshots
 
 #### Deployed Contract Called & Transaction Result
