@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-amber-50/30 text-stone-800 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(254, 250, 240, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(217, 119, 6, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 119, 6, 0.6);
+}
+
+/* Solar Grid Background */
+.solar-grid {
+  background-image: radial-gradient(rgba(217, 119, 6, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Glassmorphic Neumorphic Card */
+.solar-card {
+  background: #ffffff;
+  border: 1px solid rgba(217, 119, 6, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(217, 119, 6, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.solar-input {
+  background: #ffffff;
+  border: 1.5px solid rgba(148, 163, 184, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.solar-input:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.1);
+  outline: none;
+}
