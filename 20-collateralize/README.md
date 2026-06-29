@@ -2,8 +2,10 @@
 
 Collateralize is a premium decentralized application (dApp) built on the Stellar network and Soroban smart contracts. It enables borrowers to lock their XLM into secure, trustless vaults to serve as collateral for peer-to-peer Web3 loans.
 
-## 🛠️ Project Structure
-This repository is organized in progressive levels:
+---
+
+## 📁 Project Structure
+The repository is organized into progressive levels:
 - `level-1-white-belt/frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic collateral transfers.
 - `level-2-yellow-belt/`:
   - `contracts/`: Soroban Rust smart contracts managing collateral logic.
@@ -13,15 +15,14 @@ This repository is organized in progressive levels:
 
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
-### Features
-- Freighter Wallet connection & disconnect.
-- Real-time native XLM balance synchronization with Stellar Horizon.
-- Signed XLM payment submission on Stellar Testnet.
-- Interactive transaction status updates and feedback.
+### 📝 Requirements & Features
+- **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` and `@creit.tech/stellar-wallets-kit` on Stellar Testnet.
+- **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
+- **Transaction Submission:** Submit signed XLM payment transactions to lock collateral.
+- **UI/UX:** Responsive, premium interface with interactive toast notifications.
 
-### How to Run Locally
-
-1. Navigate to the Level 1 frontend:
+### 💻 How to Run Locally
+1. Navigate to the Level 1 frontend folder:
    ```bash
    cd level-1-white-belt/frontend
    ```
@@ -29,53 +30,49 @@ This repository is organized in progressive levels:
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Run the Vite development server:
    ```bash
    npm run dev
    ```
 
-### Screenshots
+### 📸 Submission Screenshots
 
-#### Wallet Connected & Balance Displayed
-![Wallet Connected](./screenshots/level-1-connected.png)
-
-#### Successful Testnet Transaction
-![Successful Transaction](./screenshots/level-1-success.png)
+#### Wallet Connection, Balance Display, & Successful Testnet Transaction
+![Level 1 Submission Screenshot](./screenshots/Collateralize_Level 1.png)
 
 ---
 
-## 🟡 Level 2: Yellow Belt (Smart Contracts)
+## 🟡 Level 2: Yellow Belt (Smart Contracts & Event Sync)
 
-### Features
-- Multi-wallet selector supporting Freighter, xBull, and LOBSTR.
-- Interaction with deployed Soroban contracts on Stellar Testnet.
-- Complete transaction status workflow (idle -> connecting -> pending -> success -> fail).
-- Real-time synchronized on-chain event stream.
-- Structured wallet error handling (WalletNotFound, WalletConnectionRejected, InsufficientBalance).
+### 📝 Requirements & Features
+- **Multi-Wallet Support:** Seamless selection panel for Freighter, MetaMask (EVM/Snap), xBull, and LOBSTR.
+- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet.
+- **On-chain Sync:** Real-time event subscription log mirroring smart contract state.
+- **Error Handling:** 3 handled error conditions (`WalletNotFound`, `WalletConnectionRejected`, `InsufficientBalance`).
+- **Interactive Simulator:** Fast testing capability for key network operations.
 
-### How to Run Locally
-
-1. Navigate to the Level 2 frontend:
+### 💻 How to Run Locally
+1. Navigate to the Level 2 frontend folder:
    ```bash
    cd level-2-yellow-belt/frontend
    ```
-2. Install dependencies:
+2. Install the necessary dependencies:
    ```bash
    npm install
    ```
-3. Run the development server:
+3. Launch the development server:
    ```bash
    npm run dev
    ```
 
-### Details
-- **Deployed Contract Address**: `CC3RGEXNVAULT789B...` (Testnet)
-- **Transaction Hash (Stellar Explorer)**: `a78ef...`
+### ⚙️ Verification Details
+- **Deployed Contract Address:** `CC3RGEXNVAULT789B...`
+- **Transaction Hash (Stellar Explorer):** `a78ef68dbd982b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38a7c`
 
-### Screenshots
+### 📸 Submission Screenshots
 
-#### Wallet Options Available
-![Wallet Options](./screenshots/level-2-wallets.png)
+#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
+![Level 2 Available Wallets](./screenshots/Collateralize 1_Level 2.png)
 
-#### Contract Called & Transaction Hash
-![Contract Called](./screenshots/level-2-contract-call.png)
+#### Deployed Contract Called & Transaction Result
+![Level 2 Contract Call](./screenshots/Collateralize transaction_Level 2.png)
