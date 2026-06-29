@@ -81,10 +81,6 @@ graph TD
    npm run dev
    ```
 
-### ⚙️ Verification Details
-- **Deployed Contract Address:** `CC3RYIELDANCHOR...`
-- **Transaction Hash (Stellar Explorer):** `a78ef68dbd982b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38a7c`
-
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options & Pool Allocations

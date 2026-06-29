@@ -79,10 +79,6 @@ graph TD
    npm run dev
    ```
 
-### ⚙️ Verification Details
-- **Deployed Contract Address:** `CC3RAGENTPAY...`
-- **Transaction Hash (Stellar Explorer):** `d18ef88cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38d1c`
-
 ### 📸 Submission Screenshots
 
 #### Admin CLI Identity & Budget Approval (Level 2 Console)

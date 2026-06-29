@@ -80,10 +80,6 @@ graph TD
    npm run dev
    ```
 
-### ⚙️ Verification Details
-- **Deployed Contract Address:** `CC3RGIFT3RVAULT...`
-- **Transaction Hash (Stellar Explorer):** `a98db86cb312e75fbe87c0ab6134bdfec9d749925e01be7f21a8d38cb38de9c`
-
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options & Payout Transactions

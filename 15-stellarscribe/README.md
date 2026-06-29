@@ -79,10 +79,6 @@ graph TD
    npm run dev
    ```
 
-### ⚙️ Verification Details
-- **Deployed Contract Address:** `CC3RSTELLARSCRIBE...`
-- **Transaction Hash (Stellar Explorer):** `b26df77cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a39c9f`
-
 ### 📸 Submission Screenshots
 
 #### Deployed Smart Contract Called, Event Logger Sync, & Successful Transaction
