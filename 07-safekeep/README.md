@@ -13,13 +13,25 @@ The repository is organized into progressive levels:
 
 ---
 
+## ⚙️ SafeKeep Protocol
+
+```mermaid
+graph TD
+    A[User] -->|Configure Guardians| B(SafeKeep Vault Contract)
+    B -->|Inactivity Threshold Met| C{Recovery Mode Triggered}
+    C -->|Guardians Sign Recovery| D[Multi-Sig Verification]
+    D -->|Transfer Ownership| E[New Wallet Address]
+```
+
+---
+
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
 - **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` on Stellar Testnet.
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payment transactions to vault assets.
-- **UI/UX:** Responsive, premium interface featuring a **Military Grid Vault** theme with Sky Blue neon accents and scanlines.
+- **UI/UX:** Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -65,17 +77,11 @@ The repository is organized into progressive levels:
    npm run dev
    ```
 
+### ⚙️ Verification Details
+- **Deployed Contract Address:** `CC7SAFEKEEP...`
+- **Transaction Hash (Stellar Explorer):** `c88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
+
 ### 📸 Submission Screenshots
 
-#### 1. Wallet Options Available (MetaMask, Freighter, etc.)
-*(Replace with your wallet options screenshot if taken)*
-
-#### 2. Deployed Contract Address & Call
-- **Contract ID:** `CC3RSAFEKEEPVAULT...TESTNET` (Replace with your actual contract)
+#### Deployed Contract Called & Transaction Result
 ![Level 2 Contract Call](./screenshots/level2_transaction_safekeep.png)
-
-#### 3. Transaction Hash (MetaMask Testnet Transaction)
-- **Tx Hash:** *(Replace with your hash)*
-
-#### 4. Live Demo Link
-- **Live Demo:** *(Replace with Vercel/Netlify link)*

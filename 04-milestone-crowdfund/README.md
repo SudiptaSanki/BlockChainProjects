@@ -13,13 +13,26 @@ The repository is organized into progressive levels:
 
 ---
 
+## ⚙️ Milestone Crowdfund Protocol
+
+```mermaid
+graph TD
+    A[Backers] -->|Pledge XLM| B(Crowdfund Contract)
+    B -->|Campaign Goal Reached| C{Milestone 1 Unlocked}
+    C -->|Release Partial Funds| D[Creator Wallet]
+    B -.->|Goal Failed| E[Refund Backers]
+    C -->|Milestone 2 Approval| F[Release Remaining]
+```
+
+---
+
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
 - **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` on Stellar Testnet.
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payment transactions to lock crowdfunded capital.
-- **UI/UX:** Responsive, premium interface featuring a **Solarpunk Cyber** theme with Hot Orange neon accents and scanlines.
+- **UI/UX:** Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -65,17 +78,11 @@ The repository is organized into progressive levels:
    npm run dev
    ```
 
+### ⚙️ Verification Details
+- **Deployed Contract Address:** `CC4MILESTONE...`
+- **Transaction Hash (Stellar Explorer):** `c88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
+
 ### 📸 Submission Screenshots
 
-#### 1. Wallet Options Available (MetaMask, Freighter, etc.)
-*(Replace with your wallet options screenshot if taken)*
-
-#### 2. Deployed Contract Address & Call
-- **Contract ID:** `CC3RMILESTONEVAULT...TESTNET` (Replace with your actual contract)
-![Contract Call](./screenshots/level2_transaction_milestone_crowdfund.png)
-
-#### 3. Transaction Hash (MetaMask Testnet Transaction)
-- **Tx Hash:** *(Replace with your hash)*
-
-#### 4. Live Demo Link
-- **Live Demo:** *(Replace with Vercel/Netlify link)*
+#### Deployed Contract Called & Transaction Result
+![Level 2 Contract Call](./screenshots/level2_transaction_milestone_crowdfund.png)

@@ -13,13 +13,25 @@ The repository is organized into progressive levels:
 
 ---
 
+## ⚙️ Vesta Payroll Protocol
+
+```mermaid
+graph TD
+    A[Employer / HR] -->|Deposit Payroll Funds| B(Vesta Payroll Contract)
+    B -->|Time-Locked Streaming| C{Employee Accounts}
+    C -->|Withdraw Available Salary| D[Employee Wallet]
+    D -->|Real-Time On-chain Event| E[Dashboard Sync]
+```
+
+---
+
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
 - **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` on Stellar Testnet.
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payment transactions to distribute payroll.
-- **UI/UX:** Responsive, premium interface featuring a **Cyber-Corp Grid** cyberpunk theme with Matrix Green neon accents and scanlines.
+- **UI/UX:** Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -64,6 +76,10 @@ The repository is organized into progressive levels:
    ```bash
    npm run dev
    ```
+
+### ⚙️ Verification Details
+- **Deployed Contract Address:** `CC1VESTAPAYROLL...`
+- **Transaction Hash (Stellar Explorer):** `c88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
 
 ### 📸 Submission Screenshots
 

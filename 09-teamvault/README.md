@@ -13,13 +13,25 @@ The repository is organized into progressive levels:
 
 ---
 
+## ⚙️ TeamVault Protocol
+
+```mermaid
+graph TD
+    A[DAO Member] -->|Propose Allocation| B(TeamVault Contract)
+    B -->|Require N of M Signatures| C{Multi-Sig Co-Signers}
+    C -->|Signatures Collected| D[Execute Allocation]
+    D -->|Transfer Funds| E[Recipient / Treasury]
+```
+
+---
+
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
 - **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` on Stellar Testnet.
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payment transactions to propose treasury allocations.
-- **UI/UX:** Responsive, premium interface featuring a **DAO Megacorp** theme with Indigo neon accents and scanlines.
+- **UI/UX:** Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -65,17 +77,11 @@ The repository is organized into progressive levels:
    npm run dev
    ```
 
+### ⚙️ Verification Details
+- **Deployed Contract Address:** `CC9TEAMVAULT...`
+- **Transaction Hash (Stellar Explorer):** `c88ef97cbd983b618991c0b39e6a0d2f1be7399a9b6c161cd5d7f12e88a38b8c`
+
 ### 📸 Submission Screenshots
 
-#### 1. Wallet Options Available (MetaMask, Freighter, etc.)
-*(Replace with your wallet options screenshot if taken)*
-
-#### 2. Deployed Contract Address & Call
-- **Contract ID:** `CC3RTEAMVAULTVAULT...TESTNET` (Replace with your actual contract)
+#### Deployed Contract Called & Transaction Result
 ![Level 2 Contract Call](./screenshots/level2_transaction_teamvault.png)
-
-#### 3. Transaction Hash (MetaMask Testnet Transaction)
-- **Tx Hash:** *(Replace with your hash)*
-
-#### 4. Live Demo Link
-- **Live Demo:** *(Replace with Vercel/Netlify link)*
