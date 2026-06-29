@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "19-gift3r-level-1",
   "version": "0.1.0",
   "private": true,
@@ -7,7 +7,7 @@
   "dependencies": {
     "@stellar/freighter-api": "latest",
     "@stellar/stellar-sdk": "latest",
-    "@stellar/wallets-kit": "latest",
+    "@creit.tech/stellar-wallets-kit": "latest",
     "@vitejs/plugin-react": "latest",
     "framer-motion": "latest",
     "vite": "latest",
@@ -15,7 +15,7 @@
     "typescript": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "tailwindcss": "latest",
+    "tailwindcss": "^3.4.17",
     "postcss": "latest",
     "autoprefixer": "latest"
   },
