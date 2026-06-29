@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#fcfbf7] text-[#2c2d3c] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, .font-serif-display {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(252, 251, 247, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(63, 81, 181, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 81, 181, 0.6);
+}
+
+/* Parchment/ruled paper effect */
+.parchment-bg {
+  background-image: linear-gradient(rgba(63, 81, 181, 0.04) 1px, transparent 0);
+  background-size: 100% 28px;
+}
+
+/* Retro notebook border card */
+.notebook-card {
+  background: #ffffff;
+  border: 1px solid rgba(63, 81, 181, 0.12);
+  box-shadow: 0 4px 20px -2px rgba(63, 81, 181, 0.05), 0 2px 4px rgba(0, 0, 0, 0.01);
+}
+
+/* Input card */
+.notebook-input {
+  background: #fdfdfb;
+  border-bottom: 2px solid rgba(63, 81, 181, 0.2);
+  color: #2c2d3c;
+  transition: all 0.25s ease;
+}
+.notebook-input:focus {
+  border-bottom-color: #3f51b5;
+  outline: none;
+}
