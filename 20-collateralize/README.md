@@ -38,7 +38,7 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/Collateralize_Level 1.png)
+![Level 1 Submission Screenshot](./screenshots/Collateralize_Level%201.png)
 
 ---
 
@@ -72,7 +72,7 @@ The repository is organized into progressive levels:
 ### 📸 Submission Screenshots
 
 #### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/Collateralize 1_Level 2.png)
+![Level 2 Available Wallets](./screenshots/Collateralize%201_Level%202.png)
 
 #### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/Collateralize transaction_Level 2.png)
+![Level 2 Contract Call](./screenshots/Collateralize%20transaction_Level%202.png)
