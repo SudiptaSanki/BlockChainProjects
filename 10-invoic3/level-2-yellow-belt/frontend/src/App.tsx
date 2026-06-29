@@ -7,9 +7,9 @@ const project = {
   "short": "Invoic3",
   "useCase": "On-chain invoice factoring schedules",
   "audience": "Businesses and Clients",
-  "primary": "#d97706",
-  "secondary": "#b45309",
-  "accent": "#92400e",
+  "primary": "#2563eb",
+  "secondary": "#1d4ed8",
+  "accent": "#3b82f6",
   "contract": "Invoice Vault Smart Contract",
   "action": "Initialize Invoice Settlement",
   "contractId": "CC3RINVOIC3VAULT...TESTNET"
@@ -251,7 +251,7 @@ export default function App() {
               <h1 className="font-bold text-2xl tracking-wide text-stone-900 leading-none">
                 {project.short}
               </h1>
-              <span className="text-[10px] uppercase tracking-widest text-amber-700 font-bold block mt-1 font-sans">Yellow Belt Vault</span>
+              <span className="text-[10px] uppercase tracking-widest text-blue-700 font-bold block mt-1 font-sans">Yellow Belt Vault</span>
             </div>
           </div>
 
@@ -261,7 +261,7 @@ export default function App() {
                 key={item.id}
                 className={`w-full px-5 py-4 rounded-xl text-sm font-semibold tracking-wider text-left transition-all duration-300 ${
                   page === item.id 
-                    ? 'bg-amber-600/10 text-amber-800 border-l-4 border-amber-600 shadow-sm' 
+                    ? 'bg-blue-600/10 text-blue-800 border-l-4 border-blue-600 shadow-sm' 
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
                 }`}
                 onClick={() => setPage(item.id)}
@@ -277,8 +277,8 @@ export default function App() {
             onClick={publicKey ? disconnectWallet : () => connectWallet()}
             className={`w-full py-3.5 rounded-xl font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm ${
               publicKey 
-                ? 'bg-stone-200 hover:bg-stone-300 text-stone-800' 
-                : 'bg-amber-750 hover:bg-amber-900 text-white shadow-amber-850/15'
+                ? 'bg-stone-200 hover:bg-stone-300 text-stone-850' 
+                : 'bg-blue-700 hover:bg-blue-800 text-white shadow-blue-850/15'
             }`}
           >
             {publicKey ? shortKey : 'Link Wallet'}
@@ -292,10 +292,10 @@ export default function App() {
         <main className="max-w-4xl mx-auto w-full px-12 py-16 flex flex-col gap-10">
           
           {/* Status Display */}
-          <div className="luxury-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-l-2 border-l-amber-600 bg-white/5">
+          <div className="luxury-card p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-l-2 border-l-blue-600 bg-white/5">
             <div className="flex gap-4 items-center">
               <div className={`w-3 h-3 rounded-full animate-ping ${
-                txState === 'success' ? 'bg-amber-500' : txState === 'fail' ? 'bg-rose-500' : 'bg-amber-400'
+                txState === 'success' ? 'bg-blue-500' : txState === 'fail' ? 'bg-rose-500' : 'bg-blue-400'
               }`} />
               <div>
                 <p className="text-xs uppercase text-stone-400 font-mono">Consensus State</p>
@@ -323,7 +323,7 @@ export default function App() {
                 className="grid md:grid-cols-3 gap-6"
               >
                 <div className="md:col-span-2 luxury-card p-8 rounded-3xl flex flex-col justify-center gap-6">
-                  <span className="text-xs font-calligraphy text-amber-500">Ancient Trust in Digital Ledger Vaults</span>
+                  <span className="text-xs font-calligraphy text-blue-500">Ancient Trust in Digital Ledger Vaults</span>
                   <h2 className="text-3xl font-extrabold tracking-tight text-white leading-tight">
                     Lock Invoice Vault Factoring
                   </h2>
@@ -333,7 +333,7 @@ export default function App() {
                   <div className="flex gap-3">
                     <button 
                       onClick={() => setPage('wallets')}
-                      className="px-5 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-sm transition-all duration-300"
+                      className="px-5 py-3 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-semibold text-sm transition-all duration-300"
                     >
                       Signatures
                     </button>
@@ -350,23 +350,23 @@ export default function App() {
                   <h3 className="font-bold text-lg text-white">Yellow Belt Deliverables</h3>
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
-                      <span className="text-amber-500 font-bold">✓</span>
+                      <span className="text-blue-500 font-bold">✓</span>
                       <span className="text-xs text-stone-400">Freighter & MetaMask Active</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-amber-500 font-bold">✓</span>
+                      <span className="text-blue-500 font-bold">✓</span>
                       <span className="text-xs text-stone-400">Invoice vault parameters lock</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-amber-500 font-bold">✓</span>
+                      <span className="text-blue-500 font-bold">✓</span>
                       <span className="text-xs text-stone-400">3 Handled Wallet errors</span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-amber-500 font-bold">✓</span>
+                      <span className="text-blue-500 font-bold">✓</span>
                       <span className="text-xs text-stone-400">Event synchronized live logs</span>
                     </div>
                   </div>
-                  <div className="p-4 bg-stone-950/40 rounded-2xl border border-amber-600/10">
+                  <div className="p-4 bg-stone-950/40 rounded-2xl border border-blue-600/10">
                     <span className="text-[10px] uppercase text-stone-500 font-bold block mb-1">Active Action</span>
                     <strong className="text-sm text-stone-300">{project.action}</strong>
                   </div>
@@ -391,15 +391,15 @@ export default function App() {
                         onClick={() => connectWallet(wallet.id)}
                         className={`p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 ${
                           selectedWallet === wallet.id 
-                            ? 'bg-amber-900/10 border-amber-600 text-white shadow-md' 
-                            : 'bg-stone-950/60 border-stone-800 text-stone-400 hover:text-stone-200 hover:border-stone-800'
+                            ? 'bg-blue-900/10 border-blue-600 text-white shadow-md' 
+                            : 'bg-stone-950/60 border-stone-850 text-stone-400 hover:text-stone-200 hover:border-stone-800'
                         }`}
                       >
                         <div className="flex items-center gap-4">
                           <span className="text-2xl">{wallet.icon}</span>
                           <div className="text-left">
                             <h4 className={`font-semibold text-sm ${selectedWallet === wallet.id ? 'text-white' : 'text-stone-300'}`}>{wallet.label}</h4>
-                            <span className={`text-xs ${selectedWallet === wallet.id ? 'text-amber-200' : 'text-stone-500'}`}>{wallet.note}</span>
+                            <span className={`text-xs ${selectedWallet === wallet.id ? 'text-blue-205' : 'text-stone-500'}`}>{wallet.note}</span>
                           </div>
                         </div>
                         <span className="text-xs font-mono">Link</span>
@@ -411,23 +411,23 @@ export default function App() {
                 <div className="luxury-card p-8 rounded-3xl flex flex-col gap-6 justify-between">
                   <div className="flex flex-col gap-4">
                     <h3 className="font-bold text-lg text-white">Exception Simulator</h3>
-                    <p className="text-xs text-stone-400">Trigger exceptions to evaluate compliance with handled errors.</p>
+                    <p className="text-xs text-stone-450">Trigger exceptions to evaluate compliance with handled errors.</p>
                     <div className="grid grid-cols-1 gap-2 mt-2">
                       <button 
                         onClick={() => simulateError('WalletNotFound')}
-                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-800 text-xs text-stone-300 font-medium transition-all"
+                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-850 text-xs text-stone-300 font-medium transition-all"
                       >
                         Simulate WalletNotFound
                       </button>
                       <button 
                         onClick={() => simulateError('WalletConnectionRejected')}
-                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-800 text-xs text-stone-300 font-medium transition-all"
+                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-850 text-xs text-stone-300 font-medium transition-all"
                       >
                         Simulate WalletConnectionRejected
                       </button>
                       <button 
                         onClick={() => simulateError('InsufficientBalance')}
-                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-800 text-xs text-stone-300 font-medium transition-all"
+                        className="py-3 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-850 text-xs text-stone-300 font-medium transition-all"
                       >
                         Simulate InsufficientBalance
                       </button>
@@ -489,7 +489,7 @@ export default function App() {
                   <button 
                     onClick={handleTransfer}
                     disabled={txState === 'pending'}
-                    className="w-full py-4 rounded-xl bg-amber-700 hover:bg-amber-800 font-bold text-white shadow-md shadow-amber-800/10 transition-all duration-300"
+                    className="w-full py-4 rounded-xl bg-blue-700 hover:bg-blue-800 font-bold text-white shadow-md shadow-blue-800/10 transition-all duration-300"
                   >
                     {txState === 'pending' ? 'Locking Tokens...' : 'Initialize Invoice Settlement'}
                   </button>
@@ -502,12 +502,12 @@ export default function App() {
                           href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
                           target="_blank" 
                           rel="noreferrer"
-                          className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-800 text-amber-500 hover:text-amber-400 transition-all text-center block break-all"
+                          className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 hover:text-blue-450 transition-all text-center block break-all"
                         >
                           {txHash}
                         </a>
                       ) : (
-                        <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-800 text-amber-500 text-center block break-all">
+                        <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 text-center block break-all">
                           {txHash} (Simulated EVM Invoice Synced)
                         </div>
                       )}
@@ -551,7 +551,7 @@ export default function App() {
                   <button 
                     onClick={callContract}
                     disabled={txState === 'pending'}
-                    className="w-full py-4 rounded-xl bg-amber-700 hover:bg-amber-800 font-bold text-white shadow-lg shadow-amber-850/15 transition-all duration-300"
+                    className="w-full py-4 rounded-xl bg-blue-700 hover:bg-blue-800 font-bold text-white shadow-lg shadow-blue-800/15 transition-all duration-300"
                   >
                     {txState === 'pending' ? 'Invoking Contract...' : 'Invoke Invoice Smart Contract'}
                   </button>
@@ -559,7 +559,7 @@ export default function App() {
                   {txHash && (
                     <div className="flex flex-col gap-2 mt-2">
                       <label className="text-xs uppercase tracking-wider text-stone-500 font-bold">Transaction Hash</label>
-                      <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-800 text-amber-500 text-center block break-all">
+                      <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 text-center block break-all">
                         {txHash}
                       </div>
                     </div>
@@ -586,13 +586,13 @@ export default function App() {
                     {events.map((event) => (
                       <div 
                         key={event.id}
-                        className="p-4 rounded-xl bg-stone-950/60 border border-stone-800 flex justify-between items-center text-xs"
+                        className="p-4 rounded-xl bg-stone-950/60 border border-stone-850 flex justify-between items-center text-xs"
                       >
                         <div className="flex gap-3 items-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                           <span className="text-stone-300 font-medium">{event.label}</span>
                         </div>
-                        <span className="font-mono text-stone-500">{event.time}</span>
+                        <span className="font-mono text-stone-550">{event.time}</span>
                       </div>
                     ))}
                   </div>

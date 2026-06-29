@@ -7,8 +7,8 @@ const project = {
   "short": "Invoic3",
   "useCase": "On-chain invoice factoring vaults",
   "audience": "Businesses and Clients",
-  "primary": "#d97706",
-  "secondary": "#b45309",
+  "primary": "#2563eb",
+  "secondary": "#1d4ed8",
   "action": "Initialize Invoice Lock"
 };
 
@@ -204,7 +204,7 @@ export default function App() {
               <h1 className="font-bold text-2xl tracking-wide text-stone-900 leading-none">
                 {project.short}
               </h1>
-              <span className="text-[10px] uppercase tracking-widest text-amber-700 font-bold block mt-1 font-sans">White Belt Vault</span>
+              <span className="text-[10px] uppercase tracking-widest text-blue-700 font-bold block mt-1 font-sans">White Belt Vault</span>
             </div>
           </div>
 
@@ -214,7 +214,7 @@ export default function App() {
                 key={item.id}
                 className={`w-full px-5 py-4 rounded-xl text-sm font-semibold tracking-wider text-left transition-all duration-300 ${
                   page === item.id 
-                    ? 'bg-amber-600/10 text-amber-800 border-l-4 border-amber-600 shadow-sm' 
+                    ? 'bg-blue-600/10 text-blue-800 border-l-4 border-blue-600 shadow-sm' 
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100'
                 }`}
                 onClick={() => setPage(item.id)}
@@ -231,7 +231,7 @@ export default function App() {
             className={`w-full py-3.5 rounded-xl font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm ${
               publicKey 
                 ? 'bg-stone-200 hover:bg-stone-300 text-stone-800' 
-                : 'bg-amber-700 hover:bg-amber-850 text-white shadow-amber-800/10'
+                : 'bg-blue-700 hover:bg-blue-800 text-white shadow-blue-800/10'
             }`}
           >
             {publicKey ? shortKey : 'Handshake keys'}
@@ -245,16 +245,16 @@ export default function App() {
         <main className="max-w-4xl mx-auto w-full px-12 py-16 flex flex-col gap-10">
           
           {/* Status Message Display */}
-          <div className="luxury-card p-6 rounded-2xl flex items-center justify-between gap-4 border-l-2 border-l-amber-600">
+          <div className="luxury-card p-6 rounded-2xl flex items-center justify-between gap-4 border-l-2 border-l-blue-600">
             <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-amber-600 animate-pulse" />
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-650 bg-blue-600 animate-pulse" />
               <p className="text-sm text-stone-300">
-                <span className="font-calligraphy text-amber-500 mr-2">System Status:</span> 
+                <span className="font-calligraphy text-blue-500 mr-2">System Status:</span> 
                 {message}
               </p>
             </div>
             {publicKey && (
-              <div className="text-sm font-semibold px-4 py-2 bg-amber-600/10 text-amber-400 border border-amber-900/35 rounded-xl">
+              <div className="text-sm font-semibold px-4 py-2 bg-blue-600/10 text-blue-450 text-blue-400 border border-blue-900/35 rounded-xl">
                 {balance} XLM
               </div>
             )}
@@ -271,7 +271,7 @@ export default function App() {
                 className="grid md:grid-cols-5 gap-8 items-stretch"
               >
                 <div className="md:col-span-3 luxury-card p-10 rounded-3xl flex flex-col justify-center gap-6">
-                  <span className="text-sm font-calligraphy text-amber-500">Ancient Trust in Digital Ledger Vaults</span>
+                  <span className="text-sm font-calligraphy text-blue-500">Ancient Trust in Digital Ledger Vaults</span>
                   <h2 className="text-4xl font-bold tracking-tight text-white leading-tight">
                     Secure Invoice Vault Settlements
                   </h2>
@@ -281,7 +281,7 @@ export default function App() {
                   <div className="flex gap-4">
                     <button 
                       onClick={() => setPage('wallet')}
-                      className="px-6 py-3.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold tracking-wider text-xs uppercase shadow-lg shadow-amber-800/10 transition-all duration-300"
+                      className="px-6 py-3.5 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold tracking-wider text-xs uppercase shadow-lg shadow-blue-800/10 transition-all duration-300"
                     >
                       Authenticate keys
                     </button>
@@ -295,11 +295,11 @@ export default function App() {
                 </div>
 
                 <div className="md:col-span-2 luxury-card p-8 rounded-3xl flex flex-col justify-between gap-6">
-                  <h3 className="font-bold text-xl text-amber-500 border-b border-amber-600/10 pb-4">Invoice Specifications</h3>
+                  <h3 className="font-bold text-xl text-blue-500 border-b border-blue-600/10 pb-4">Invoice Specifications</h3>
                   <div className="flex flex-col gap-5">
                     {checklist.map((item, index) => (
                       <div className="flex gap-4 items-start" key={index}>
-                        <div className="w-6 h-6 rounded-full bg-amber-600/10 text-amber-500 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 border border-amber-700/20">
+                        <div className="w-6 h-6 rounded-full bg-blue-600/10 text-blue-500 font-bold flex items-center justify-center text-xs shrink-0 mt-0.5 border border-blue-750/20">
                           {index + 1}
                         </div>
                         <div>
@@ -323,28 +323,28 @@ export default function App() {
               >
                 <div className="luxury-card p-10 rounded-3xl flex flex-col gap-6">
                   <div className="text-center flex flex-col gap-2">
-                    <h2 className="text-3xl font-bold text-amber-500">Vault Handshake</h2>
+                    <h2 className="text-3xl font-bold text-blue-500">Vault Handshake</h2>
                     <p className="text-xs text-stone-400">Configure connection to Freighter keys.</p>
                   </div>
 
-                  <div className="bg-stone-955/40 border border-stone-800 p-6 rounded-2xl flex flex-col gap-4 font-mono text-xs text-stone-300">
+                  <div className="bg-stone-900/40 border border-stone-800 p-6 rounded-2xl flex flex-col gap-4 font-mono text-xs text-stone-300">
                     <div className="flex justify-between items-center border-b border-stone-900 pb-3">
                       <span className="text-stone-500 uppercase tracking-wider text-[10px]">Vault Status</span>
                       <span className={`text-[9px] font-bold px-2.5 py-1 border rounded-xl uppercase tracking-widest ${
-                        publicKey ? 'bg-amber-900/10 text-amber-400 border-amber-600/30' : 'bg-rose-955/20 text-rose-400 border-rose-500/30'
+                        publicKey ? 'bg-blue-900/10 text-blue-400 border-blue-600/30' : 'bg-rose-950/20 text-rose-455 border-rose-500/30'
                       }`}>
                         {publicKey ? 'Synchronized' : 'Locked'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-b border-stone-900 pb-3">
                       <span className="text-stone-500 uppercase tracking-wider text-[10px]">Public Address</span>
-                      <span className="text-[10px] bg-stone-900/60 px-3 py-1.5 border border-stone-800 text-amber-400/90 rounded-lg truncate max-w-[160px]">
+                      <span className="text-[10px] bg-stone-900/60 px-3 py-1.5 border border-stone-800 text-blue-400/90 rounded-lg truncate max-w-[160px]">
                         {publicKey ? publicKey : 'Disconnected'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-stone-500 uppercase tracking-wider text-[10px]">Available Collateral</span>
-                      <strong className="text-base font-bold text-amber-400">
+                      <strong className="text-base font-bold text-blue-400">
                         {balance} XLM
                       </strong>
                     </div>
@@ -354,7 +354,7 @@ export default function App() {
                     {!publicKey ? (
                       <button 
                         onClick={connectWallet}
-                        className="w-full py-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs tracking-wider uppercase transition-all duration-300"
+                        className="w-full py-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs tracking-wider uppercase transition-all duration-300"
                       >
                         Handshake keys
                       </button>
@@ -368,7 +368,7 @@ export default function App() {
                         </button>
                         <button 
                           onClick={fundWallet}
-                          className="py-4 bg-amber-750/15 hover:bg-amber-750/30 border border-amber-600/30 text-amber-400 rounded-xl font-bold text-xs tracking-wider uppercase transition-all duration-300"
+                          className="py-4 bg-blue-750/15 hover:bg-blue-750/30 border border-blue-600/30 text-blue-450 text-blue-400 rounded-xl font-bold text-xs tracking-wider uppercase transition-all duration-300"
                         >
                           Activate Vault
                         </button>
@@ -389,7 +389,7 @@ export default function App() {
               >
                 <div className="luxury-card p-10 rounded-3xl flex flex-col gap-6">
                   <div className="text-center flex flex-col gap-2">
-                    <h2 className="text-3xl font-bold text-amber-500">Lock Invoice Settlements</h2>
+                    <h2 className="text-3xl font-bold text-blue-500">Lock Invoice Settlements</h2>
                     <p className="text-xs text-stone-400">Submit secure payment with lock parameters.</p>
                   </div>
 
@@ -428,7 +428,7 @@ export default function App() {
                   <button 
                     onClick={initiateEscrow}
                     disabled={state === 'submitting'}
-                    className="w-full py-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs tracking-wider uppercase transition-all duration-300 disabled:opacity-50"
+                    className="w-full py-4 rounded-xl bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs tracking-wider uppercase transition-all duration-300 disabled:opacity-50"
                   >
                     {state === 'submitting' ? 'locking vault...' : 'LOCK INVOICE FUNDS'}
                   </button>
@@ -445,11 +445,11 @@ export default function App() {
                 className="max-w-md mx-auto w-full"
               >
                 <div className="luxury-card p-10 rounded-3xl flex flex-col gap-6">
-                  <h2 className="text-3xl font-bold text-center text-amber-500">Invoice Ledger Logs</h2>
+                  <h2 className="text-3xl font-bold text-center text-blue-500">Invoice Ledger Logs</h2>
 
-                  <div className="bg-stone-950/40 border border-amber-600/10 p-6 rounded-2xl flex flex-col gap-4 text-center">
+                  <div className="bg-stone-950/40 border border-blue-600/10 p-6 rounded-2xl flex flex-col gap-4 text-center">
                     <div className={`w-12 h-12 rounded-full mx-auto flex items-center justify-center font-bold border ${
-                      state === 'success' ? 'bg-amber-600/10 text-amber-500 border-amber-600/30' : 'bg-rose-950/20 text-rose-455 border-rose-500/30'
+                      state === 'success' ? 'bg-blue-600/10 text-blue-500 border-blue-600/30' : 'bg-rose-955/20 text-rose-455 border-rose-500/30'
                     }`}>
                       {state === 'success' ? '✓' : 'ℹ'}
                     </div>
@@ -466,7 +466,7 @@ export default function App() {
                         href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-[10px] p-4 rounded-xl bg-stone-950/60 hover:bg-stone-900 border border-stone-800 text-amber-500 hover:text-amber-400 transition-all text-center block break-all font-mono"
+                        className="text-[10px] p-4 rounded-xl bg-stone-900/60 hover:bg-stone-900 border border-stone-800 text-blue-500 hover:text-blue-400 transition-all text-center block break-all font-mono"
                       >
                         {txHash}
                       </a>
