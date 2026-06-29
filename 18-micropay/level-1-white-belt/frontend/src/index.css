@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, .font-mono-tech {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.3);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(245, 158, 11, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(245, 158, 11, 0.6);
+}
+
+/* Tech grid/waves */
+.cyber-grid {
+  background-image: linear-gradient(rgba(245, 158, 11, 0.02) 1px, transparent 0),
+                    linear-gradient(90deg, rgba(245, 158, 11, 0.02) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Amber neon glow panel */
+.amber-glow-panel {
+  background: rgba(9, 13, 22, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.02), inset 0 0 15px rgba(245, 158, 11, 0.01);
+}
+
+/* Glowing text */
+.glow-text-amber {
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+/* Cyber inputs */
+.cyber-input {
+  background: rgba(2, 6, 23, 0.9);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fde047;
+  transition: all 0.3s ease-in-out;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cyber-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+  outline: none;
+}
