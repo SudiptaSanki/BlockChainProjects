@@ -1,0 +1,9 @@
+# Ignore root screenshots
+/*.png
+/stellarscribe*.png
+/level*_EcoFund.png
+/level*_billsplitter.png
+/level*_agentpay.png
+/level*_Gift3r.png
+/level*_YieldAnchor.png
+/level*_micropay.png
