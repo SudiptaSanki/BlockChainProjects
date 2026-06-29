@@ -54,7 +54,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/MicroPay_Level_1.png)
+![Level 1 Submission Screenshot](./screenshots/Level%201_micropay%20hub.png)
 
 ---
 
@@ -87,8 +87,5 @@ graph TD
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/MicroPay_1_Level_2.png)
-
-#### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/MicroPay_transaction_Level_2.png)
+#### Available Wallet Options & Stream Allocations
+![Level 2 Available Wallets & Stream Allocations](./screenshots/Level%202trans_micropay%20hub.png)
