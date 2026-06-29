@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#080b15] text-slate-100 antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(8, 11, 21, 0.3);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.6);
+}
+
+/* Solar Grid Background */
+.neon-travel-grid {
+  background-image: radial-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Glassmorphic Rounded Card */
+.neon-travel-card {
+  background: rgba(15, 20, 38, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 15px rgba(249, 115, 22, 0.02);
+}
+
+.neon-travel-input {
+  background: rgba(6, 8, 18, 0.9);
+  border: 1.5px solid rgba(249, 115, 22, 0.2);
+  color: #ffedd5;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.neon-travel-input:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.25);
+  outline: none;
+}

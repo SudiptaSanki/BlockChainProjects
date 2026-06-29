@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#fbfaff] text-slate-800 antialiased;
+    font-family: 'Outfit', sans-serif;
+  }
+  h1, h2, h3, .font-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(251, 250, 255, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.6);
+}
+
+/* Circuit grid backdrop */
+.circuit-grid {
+  background-image: radial-gradient(rgba(124, 58, 237, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Glassmorphic Rounded Card */
+.glass-ai-card {
+  background: #ffffff;
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.08), 0 1px 3px rgba(0, 0, 0, 0.01);
+}
+
+.glass-ai-input {
+  background: #ffffff;
+  border: 1.5px solid rgba(124, 58, 237, 0.15);
+  color: #1e1b4b;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-ai-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.12);
+  outline: none;
+}

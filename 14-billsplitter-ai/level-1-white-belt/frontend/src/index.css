@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-sky-50/20 text-[#162849] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, .font-serif-display {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+/* Custom premium scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(224, 242, 254, 0.4);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(38, 63, 115, 0.3);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(38, 63, 115, 0.6);
+}
+
+/* Travel ticket grid */
+.travel-grid {
+  background-image: radial-gradient(rgba(38, 63, 115, 0.03) 1.5px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* Receipt ticket outline */
+.ticket-card {
+  background: #ffffff;
+  border: 2px dashed rgba(38, 63, 115, 0.15);
+  box-shadow: 0 10px 25px -5px rgba(38, 63, 115, 0.05);
+}
+
+.ticket-input {
+  background: #fcfdfe;
+  border: 1px solid rgba(38, 63, 115, 0.15);
+  color: #162849;
+  transition: all 0.25s ease;
+}
+.ticket-input:focus {
+  border-color: #fb5607;
+  box-shadow: 0 0 10px rgba(251, 86, 7, 0.15);
+  outline: none;
+}
