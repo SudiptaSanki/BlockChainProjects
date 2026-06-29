@@ -67,6 +67,7 @@ The repository is organized into progressive levels:
 
 ### ⚙️ Verification Details
 Testnet (CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+
 Transaction Hash: 99ab2746f9fe1f99bcd56bf67af4f8cb7cf9fde3fbc767e4fd617e6ae08aba7d
 
 ### 📸 Submission Screenshots

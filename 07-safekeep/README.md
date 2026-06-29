@@ -79,6 +79,7 @@ graph TD
 
 ### ⚙️ Verification Details
 Testnet (CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+
 Transaction Hash: e95f621dbe5b4575a8728dbd9da3a4f7
 
 ### 📸 Submission Screenshots
