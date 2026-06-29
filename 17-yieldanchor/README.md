@@ -54,7 +54,7 @@ graph TD
 ### 📸 Submission Screenshots
 
 #### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/YieldAnchor_Level_1.png)
+![Level 1 Submission Screenshot](./screenshots/level%201_YieldAnchor.png)
 
 ---
 
@@ -87,8 +87,5 @@ graph TD
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options (Freighter, MetaMask, xBull, LOBSTR)
-![Level 2 Available Wallets](./screenshots/YieldAnchor_1_Level_2.png)
-
-#### Deployed Contract Called & Transaction Result
-![Level 2 Contract Call](./screenshots/YieldAnchor_transaction_Level_2.png)
+#### Available Wallet Options & Pool Allocations
+![Level 2 Available Wallets & Pool Allocations](./screenshots/level%202%20trans_YieldAnchor.png)
