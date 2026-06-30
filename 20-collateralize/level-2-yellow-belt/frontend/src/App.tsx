@@ -1,5 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { connectWalletKit } from './services/freighter';
+import { submitPayment, invokeContract, HORIZON_URL } from './services/stellar';
 
 const project = {
   "dir": "20-collateralize",
@@ -12,11 +14,8 @@ const project = {
   "accent": "#10b981",
   "contract": "P2P Lending Smart Contract",
   "action": "Invoke Lock Collateral",
-  "contractId": "CC3RGEXNVAULT789B...TESTNET"
+  "contractId": "CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH"
 };
-
-const HORIZON_URL = 'https://horizon-testnet.stellar.org';
-const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 const pages = [
   { id: 'overview', label: 'Dashboard' },
@@ -25,13 +24,6 @@ const pages = [
   { id: 'contract', label: 'Smart Contract' },
   { id: 'events', label: 'Event Sync' },
 ] as const;
-
-const walletOptions = [
-  { id: 'freighter', label: 'Freighter Wallet', note: 'Stellar Extension', icon: '⚓' },
-  { id: 'metamask', label: 'MetaMask Wallet', note: 'EVM / Bridge Mode', icon: '🦊' },
-  { id: 'xbull', label: 'xBull Wallet', note: 'Browser Extension', icon: '🐂' },
-  { id: 'lobstr', label: 'LOBSTR Wallet', note: 'WalletConnect Path', icon: '🦞' },
-];
 
 type PageId = (typeof pages)[number]['id'];
 type TxState = 'idle' | 'connecting' | 'pending' | 'success' | 'fail';
@@ -46,78 +38,6 @@ function errorCopy(error: WalletError) {
   return copy[error];
 }
 
-function readValue(value: any, keys: string[]) {
-  if (value && typeof value === 'object') {
-    for (const key of keys) {
-      if (key in value) return value[key];
-    }
-  }
-  return value;
-}
-
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
-async function connectFreighter() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) throw new Error('WalletNotFound');
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('WalletConnectionRejected');
-  return publicKey as string;
-}
-
-async function connectMetaMask() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts[0]) {
-        return accounts[0] as string;
-      }
-    } catch {
-      throw new Error('WalletConnectionRejected');
-    }
-  }
-  throw new Error('WalletNotFound');
-}
-
-async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
-}
-
 function makeEvent(label: string) {
   return { id: crypto.randomUUID(), label, time: new Date().toLocaleTimeString() };
 }
@@ -130,7 +50,7 @@ export default function App() {
   const [txState, setTxState] = useState<TxState>('idle');
   const [error, setError] = useState<WalletError | ''>('');
   const [contractAddress, setContractAddress] = useState(project.contractId);
-  const [contractValue, setContractValue] = useState(project.action);
+  const [contractValue, setContractValue] = useState('initialize');
   const [txHash, setTxHash] = useState('');
   const [destination, setDestination] = useState('');
   const [amount, setAmount] = useState('10');
@@ -142,42 +62,35 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'No wallet active';
 
-  async function connectWallet(walletId = selectedWallet) {
-    setSelectedWallet(walletId);
+  async function connectWalletModal() {
     setTxState('connecting');
     setError('');
-    setPublicKey('');
     try {
-      let key = '';
-      if (walletId === 'freighter') {
-        key = await connectFreighter();
-      } else if (walletId === 'metamask') {
-        key = await connectMetaMask();
-      } else {
-        throw new Error('WalletNotFound');
-      }
-      setPublicKey(key);
-      setTxState('success');
-      setEvents((items) => [makeEvent(`${walletId.toUpperCase()} wallet authorized: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
-      // Load mock balance for MetaMask, try to load real balance for Freighter
-      if (walletId === 'freighter') {
-        try {
-          const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
-          const account = await response.json();
-          const native = account.balances?.find((b: any) => b.asset_type === 'native');
-          setBalance(native?.balance ?? '0.0000000');
-        } catch {
-          setBalance('0.0000000');
+      await connectWalletKit(
+        async (walletId, pubKey) => {
+          setSelectedWallet(walletId);
+          setPublicKey(pubKey);
+          setTxState('success');
+          setEvents((items) => [makeEvent(`${walletId.toUpperCase()} wallet authorized: ${pubKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
+          
+          try {
+            const response = await fetch(`${HORIZON_URL}/accounts/${pubKey}`);
+            const account = await response.json();
+            const native = account.balances?.find((b: any) => b.asset_type === 'native');
+            setBalance(native?.balance ?? '0.0000000');
+          } catch {
+            setBalance('0.0000000');
+          }
+        },
+        (err) => {
+          setTxState('fail');
+          setError('WalletConnectionRejected');
+          setEvents((items) => [makeEvent(`Failed to connect: WalletConnectionRejected`), ...items.slice(0, 7)]);
         }
-      } else {
-        setBalance('100.0000000'); // Mock EVM balance
-      }
-    } catch (caught: any) {
+      );
+    } catch (e) {
       setTxState('fail');
-      const nextError: WalletError = caught.message === 'WalletConnectionRejected' ? 'WalletConnectionRejected' : 'WalletNotFound';
-      setError(nextError);
-      setEvents((items) => [makeEvent(`Failed to connect ${walletId}: ${nextError}`), ...items.slice(0, 7)]);
+      setError('WalletNotFound');
     }
   }
 
@@ -199,29 +112,24 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
+
+    if (parseFloat(balance) < parseFloat(amount)) {
+      simulateError('InsufficientBalance');
+      return;
+    }
+
     setTxState('pending');
     setTxHash('');
-    setEvents((items) => [makeEvent(`Initiating transfer of ${amount} XLM...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Locking ${amount} XLM collateral vault transfer to ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      if (selectedWallet === 'freighter') {
-        // Real testnet payment
-        const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
-        setTxHash(hash);
-        setTxState('success');
-        setEvents((items) => [makeEvent(`Transfer complete. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      } else {
-        // Simulated bridge transfer for MetaMask/xBull/LOBSTR
-        setTimeout(() => {
-          const hash = crypto.randomUUID().replace(/-/g, '');
-          setTxHash(hash);
-          setTxState('success');
-          setEvents((items) => [makeEvent(`Bridge transfer complete. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-        }, 1500);
-      }
+      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      setTxHash(hash);
+      setTxState('success');
+      setEvents((items) => [makeEvent(`Collateral locked. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
-      setEvents((items) => [makeEvent(`Transfer failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Collateral lock failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
     }
   }
 
@@ -232,82 +140,88 @@ export default function App() {
       return;
     }
     setTxState('pending');
-    setEvents((items) => [makeEvent(`Invoking lock contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Invoking lending smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
-    setTimeout(() => {
-      const localHash = crypto.randomUUID().replace(/-/g, '');
-      setTxHash(localHash);
+    try {
+      const hash = await invokeContract(publicKey, contractValue);
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Contract state synchronized`), ...items.slice(0, 7)]);
-    }, 1200);
+      setEvents((items) => [makeEvent(`Lending contract action completed. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    } catch (err: any) {
+      setTxState('fail');
+      setError('InsufficientBalance');
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message}`), ...items.slice(0, 7)]);
+    }
   }
 
   return (
-    <div className="min-height-screen relative overflow-hidden bg-slate-950 text-slate-100 flex flex-col justify-between">
-      {/* Background blobs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-violet-500/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
+    <div className="min-h-screen relative overflow-hidden bg-[#0a0518] text-slate-100 flex flex-col justify-between space-grid">
+      {/* Neon Glows */}
+      <div className="absolute top-[-5%] left-[-5%] w-[450px] h-[450px] rounded-full bg-violet-500/5 blur-[90px] pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-5%] w-[450px] h-[450px] rounded-full bg-pink-500/5 blur-[90px] pointer-events-none" />
 
       {/* Navigation */}
-      <nav className="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <img src="/favicon.svg" alt="Collateralize Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]" />
-          <div>
-            <h1 className="font-bold text-xl leading-none tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              {project.title}
-            </h1>
-            <span className="text-[10px] uppercase tracking-wider text-violet-400 font-semibold font-mono">Yellow Belt Control</span>
+      <div className="px-6 py-4 sticky top-0 z-50">
+        <nav className="glass-panel max-w-5xl mx-auto rounded-3xl px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/favicon.svg" alt="Collateralize Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
+            <div>
+              <h1 className="font-bold text-xl leading-none tracking-tight text-white font-display">
+                {project.short}
+              </h1>
+              <span className="text-[9px] uppercase tracking-wider text-violet-400 font-bold font-mono">P2P Lending Vault</span>
+            </div>
           </div>
-        </div>
 
-        <div className="hidden md:flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-white/5">
-          {pages.map((item) => (
-            <button
-              key={item.id}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                page === item.id 
-                  ? 'bg-violet-600 text-white shadow-md shadow-violet-600/20' 
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
-              }`}
-              onClick={() => setPage(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+          <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 border border-white/5 rounded-2xl">
+            {pages.map((item) => (
+              <button
+                key={item.id}
+                className={`px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all duration-300 ${
+                  page === item.id 
+                    ? 'bg-violet-600 text-white shadow-md' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                }`}
+                onClick={() => setPage(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
 
-        <button 
-          onClick={publicKey ? disconnectWallet : () => connectWallet()}
-          className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 ${
-            publicKey 
-              ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20' 
-              : 'bg-gradient-to-r from-violet-500 to-indigo-500 text-white hover:opacity-90 shadow-lg shadow-violet-500/20'
-          }`}
-        >
-          {publicKey ? shortKey : 'Connect Wallet'}
-        </button>
-      </nav>
+          <button 
+            onClick={publicKey ? disconnectWallet : connectWalletModal}
+            className={`px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase transition-all duration-300 ${
+              publicKey 
+                ? 'bg-white/10 hover:bg-white/20 text-white' 
+                : 'bg-violet-600 text-white hover:opacity-90 shadow-md shadow-violet-500/20'
+            }`}
+          >
+            {publicKey ? shortKey : 'Link Wallet'}
+          </button>
+        </nav>
+      </div>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12 flex flex-col gap-10">
+      <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12 flex flex-col gap-8 z-30">
         
-        {/* State Banner */}
+        {/* Status log */}
         <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex gap-4 items-center">
-            <div className={`w-3 h-3 rounded-full animate-pulse ${
-              txState === 'success' ? 'bg-emerald-500' : txState === 'fail' ? 'bg-rose-500' : 'bg-violet-500'
+            <div className={`w-3 h-3 rounded-full animate-ping ${
+              txState === 'success' ? 'bg-violet-500' : txState === 'fail' ? 'bg-rose-500' : 'bg-violet-400'
             }`} />
             <div>
-              <p className="text-xs uppercase text-slate-500 font-mono">Current Engine Status</p>
+              <p className="text-xs uppercase text-slate-400 font-mono">Consensus State</p>
               <h2 className="text-sm font-semibold text-slate-300 uppercase mt-0.5">{txState}</h2>
             </div>
           </div>
           <div className="flex gap-2">
-            <span className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-white/5 font-mono text-slate-400">
+            <span className="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-white/5 font-mono text-slate-300">
               Bal: {balance} XLM
             </span>
-            <span className="text-xs px-3 py-1.5 rounded-lg bg-slate-900 border border-white/5 font-mono text-slate-400">
-              Type: {selectedWallet.toUpperCase()}
+            <span className="text-xs px-3 py-1.5 rounded-full bg-slate-900 border border-white/5 font-mono text-slate-300">
+              Identity: {selectedWallet.toUpperCase()}
             </span>
           </div>
         </div>
@@ -317,57 +231,57 @@ export default function App() {
           {page === 'overview' && (
             <motion.div 
               key="overview"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
               className="grid md:grid-cols-3 gap-6"
             >
               <div className="md:col-span-2 glass-panel p-8 rounded-3xl flex flex-col justify-center gap-6">
-                <span className="text-xs uppercase tracking-wider text-pink-500 font-bold">Soroban Smart Contract Control Room</span>
-                <h2 className="text-3xl font-extrabold tracking-tight md:text-4xl bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-                  Interact with P2P Lending Vaults on Stellar
+                <span className="text-xs uppercase tracking-wider text-violet-450 font-bold font-sans">Decentralized Collateral Manager</span>
+                <h2 className="text-3xl font-extrabold tracking-tight text-white leading-tight">
+                  Secure Peer-to-Peer Loans with On-Chain Collateral
                 </h2>
                 <p className="text-slate-400 leading-relaxed text-sm">
-                  The Yellow Belt control panel bridges Ethereum (MetaMask) and Stellar (Freighter) networks. Connect wallets, trigger on-chain transfers, and interact with deployed contracts directly.
+                  Collateralize allows trustless lockups. Secure Freighter and MetaMask wallet links directly to lock collateral options on the Stellar testnet ledger.
                 </p>
                 <div className="flex gap-3">
                   <button 
                     onClick={() => setPage('wallets')}
-                    className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 font-semibold text-white shadow-lg shadow-violet-600/20 transition-all duration-300 text-sm"
+                    className="px-5 py-3 rounded-full bg-violet-600 text-white font-semibold shadow-lg shadow-violet-500/20 transition-all duration-300 text-sm"
                   >
-                    Select Wallet
+                    Identities
                   </button>
                   <button 
                     onClick={() => setPage('transfer')}
-                    className="px-5 py-3 rounded-xl border border-white/10 hover:bg-white/5 font-semibold text-slate-300 hover:text-white transition-all duration-300 text-sm"
+                    className="px-5 py-3 rounded-full border border-white/10 hover:bg-white/5 font-semibold text-slate-350 transition-all duration-300 text-sm"
                   >
-                    Transfer Funds
+                    Lock Collateral
                   </button>
                 </div>
               </div>
 
               <div className="glass-panel p-6 rounded-3xl flex flex-col justify-between gap-6">
-                <h3 className="font-bold text-lg text-slate-200">Contract Deliverables</h3>
+                <h3 className="font-bold text-lg text-white">Yellow Belt Targets</h3>
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-xs text-slate-300">Freighter & MetaMask Connection</span>
+                    <span className="text-violet-400 font-bold">✓</span>
+                    <span className="text-xs text-slate-400">Actual WalletKit Enabled</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-xs text-slate-300">Stellar Testnet Transaction Bridge</span>
+                    <span className="text-violet-400 font-bold">✓</span>
+                    <span className="text-xs text-slate-400">P2P Collateral Invoked</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-xs text-slate-300">3 Handled Wallet errors</span>
+                    <span className="text-violet-400 font-bold">✓</span>
+                    <span className="text-xs text-slate-400">3 Handled Wallet errors</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-emerald-400">✓</span>
-                    <span className="text-xs text-slate-300">Real-time synchronized event logs</span>
+                    <span className="text-violet-400 font-bold">✓</span>
+                    <span className="text-xs text-slate-400">Horizon on-chain event stream</span>
                   </div>
                 </div>
                 <div className="p-4 bg-slate-950/60 rounded-2xl border border-white/5">
-                  <span className="text-[10px] uppercase text-slate-500 font-bold block mb-1">Contract Action</span>
+                  <span className="text-[10px] uppercase text-slate-500 font-bold block mb-1">Active Scribe Action</span>
                   <strong className="text-sm text-slate-300">{project.action}</strong>
                 </div>
               </div>
@@ -377,66 +291,59 @@ export default function App() {
           {page === 'wallets' && (
             <motion.div 
               key="wallets"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
+              exit={{ opacity: 0, y: -15 }}
               className="grid md:grid-cols-2 gap-6"
             >
               <div className="glass-panel p-8 rounded-3xl flex flex-col gap-6">
-                <h3 className="font-bold text-lg">Select Wallet Option</h3>
+                <h3 className="font-bold text-lg text-white">Select Scribe Identity</h3>
                 <div className="flex flex-col gap-3">
-                  {walletOptions.map((wallet) => (
                     <button
-                      key={wallet.id}
-                      onClick={() => connectWallet(wallet.id)}
-                      className={`p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 ${
-                        selectedWallet === wallet.id 
-                          ? 'bg-violet-500/10 border-violet-500/40 text-white shadow-lg shadow-violet-500/5' 
-                          : 'bg-slate-900/60 border-white/5 hover:border-white/10 text-slate-400 hover:text-white'
-                      }`}
+                      onClick={connectWalletModal}
+                      className="p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 bg-violet-950/20 border-violet-500 text-white shadow-md"
                     >
                       <div className="flex items-center gap-4">
-                        <span className="text-2xl">{wallet.icon}</span>
+                        <span className="text-2xl">🔗</span>
                         <div className="text-left">
-                          <h4 className="font-semibold text-sm">{wallet.label}</h4>
-                          <span className="text-xs text-slate-500">{wallet.note}</span>
+                          <h4 className="font-semibold text-sm">Open Stellar Wallets Kit</h4>
+                          <span className="text-xs text-violet-300">Supports Freighter, MetaMask, etc.</span>
                         </div>
                       </div>
-                      <span className="text-xs font-mono">Connect</span>
+                      <span className="text-xs font-mono">Link</span>
                     </button>
-                  ))}
                 </div>
               </div>
 
               <div className="glass-panel p-8 rounded-3xl flex flex-col gap-6 justify-between">
                 <div className="flex flex-col gap-4">
-                  <h3 className="font-bold text-lg">Error State Simulator</h3>
-                  <p className="text-xs text-slate-400">Simulate wallet edge cases to verify application error handling.</p>
+                  <h3 className="font-bold text-lg text-white">Exception Simulator</h3>
+                  <p className="text-xs text-slate-500">Trigger exceptions to evaluate compliance with handled errors.</p>
                   <div className="grid grid-cols-1 gap-2 mt-2">
                     <button 
                       onClick={() => simulateError('WalletNotFound')}
-                      className="py-3 rounded-xl bg-slate-900 hover:bg-slate-850 border border-white/5 text-xs text-slate-300 font-medium transition-all"
+                      className="py-3 rounded-full bg-slate-950 hover:bg-slate-900 border border-white/5 text-xs text-slate-300 font-medium transition-all"
                     >
-                      Trigger WalletNotFound
+                      Simulate WalletNotFound
                     </button>
                     <button 
                       onClick={() => simulateError('WalletConnectionRejected')}
-                      className="py-3 rounded-xl bg-slate-900 hover:bg-slate-850 border border-white/5 text-xs text-slate-300 font-medium transition-all"
+                      className="py-3 rounded-full bg-slate-950 hover:bg-slate-900 border border-white/5 text-xs text-slate-300 font-medium transition-all"
                     >
-                      Trigger WalletConnectionRejected
+                      Simulate WalletConnectionRejected
                     </button>
                     <button 
                       onClick={() => simulateError('InsufficientBalance')}
-                      className="py-3 rounded-xl bg-slate-900 hover:bg-slate-850 border border-white/5 text-xs text-slate-300 font-medium transition-all"
+                      className="py-3 rounded-full bg-slate-950 hover:bg-slate-900 border border-white/5 text-xs text-slate-300 font-medium transition-all"
                     >
-                      Trigger InsufficientBalance
+                      Simulate InsufficientBalance
                     </button>
                   </div>
                 </div>
 
                 {error && (
-                  <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
-                    <strong>Error Triggered:</strong> {errorCopy(error)}
+                  <div className="p-4 rounded-xl bg-rose-955/20 border border-rose-900 text-rose-300 text-xs">
+                    <strong>Error:</strong> {errorCopy(error)}
                   </div>
                 )}
               </div>
@@ -497,20 +404,14 @@ export default function App() {
                 {txHash && (
                   <div className="flex flex-col gap-2 mt-2">
                     <label className="text-xs uppercase tracking-wider text-slate-500 font-bold">Transaction Hash</label>
-                    {selectedWallet === 'freighter' ? (
-                      <a 
-                        href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="font-mono text-xs p-4 rounded-xl bg-slate-900 border border-white/5 text-emerald-400 hover:text-emerald-300 hover:bg-slate-850 transition-all text-center block break-all"
-                      >
-                        {txHash}
-                      </a>
-                    ) : (
-                      <div className="font-mono text-xs p-4 rounded-xl bg-slate-900 border border-white/5 text-emerald-400 text-center block break-all">
-                        {txHash} (Simulated Bridge Sync)
-                      </div>
-                    )}
+                    <a 
+                      href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="font-mono text-xs p-4 rounded-xl bg-slate-900 border border-white/5 text-emerald-400 hover:text-emerald-300 hover:bg-slate-850 transition-all text-center block break-all"
+                    >
+                      {txHash}
+                    </a>
                   </div>
                 )}
               </div>
@@ -559,9 +460,14 @@ export default function App() {
                 {txHash && (
                   <div className="flex flex-col gap-2 mt-2">
                     <label className="text-xs uppercase tracking-wider text-slate-500 font-bold">Transaction Hash</label>
-                    <div className="font-mono text-xs p-4 rounded-xl bg-slate-900 border border-white/5 text-emerald-400 text-center block break-all">
+                    <a 
+                      href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="font-mono text-xs p-4 rounded-xl bg-slate-900 border border-white/5 text-emerald-400 hover:text-emerald-300 hover:bg-slate-850 transition-all text-center block break-all"
+                    >
                       {txHash}
-                    </div>
+                    </a>
                   </div>
                 )}
               </div>
@@ -589,7 +495,7 @@ export default function App() {
                       className="p-4 rounded-xl bg-slate-900/60 border border-white/5 flex justify-between items-center text-xs"
                     >
                       <div className="flex gap-3 items-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
                         <span className="text-slate-300 font-medium">{event.label}</span>
                       </div>
                       <span className="font-mono text-slate-500">{event.time}</span>

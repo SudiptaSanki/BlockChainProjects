@@ -1,5 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  StellarWalletsKit,
+  Networks,
+} from '@creit.tech/stellar-wallets-kit';
+import { invokeContract, HORIZON_URL, NETWORK_PASSPHRASE } from './services/stellar';
+import * as StellarSdk from '@stellar/stellar-sdk';
 
 const project = {
   "dir": "13-agentpay",
@@ -11,12 +17,14 @@ const project = {
   "secondary": "#06b6d4",
   "accent": "#6d28d9",
   "contract": "Agent Budget Smart Contract",
-  "action": "Approve Agent Budget",
-  "contractId": "CC3RAGENTPAY...TESTNET"
+  "action": "initialize",
+  "contractId": "CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH"
 };
 
-const HORIZON_URL = 'https://horizon-testnet.stellar.org';
-const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
+const kit = new StellarWalletsKit({
+  network: Networks.TESTNET,
+  selectedWalletId: 'freighter',
+});
 
 const pages = [
   { id: 'overview', label: 'Dashboard' },
@@ -25,13 +33,6 @@ const pages = [
   { id: 'contract', label: 'Soroban Budget Contract' },
   { id: 'events', label: 'Log Stream' },
 ] as const;
-
-const walletOptions = [
-  { id: 'freighter', label: 'Freighter Wallet', note: 'Stellar Extension', icon: '⚓' },
-  { id: 'metamask', label: 'MetaMask Wallet', note: 'EVM / Snap Integration', icon: '🦊' },
-  { id: 'xbull', label: 'xBull Wallet', note: 'Browser Extension', icon: '🐂' },
-  { id: 'lobstr', label: 'LOBSTR Wallet', note: 'WalletConnect Path', icon: '🦞' },
-];
 
 type PageId = (typeof pages)[number]['id'];
 type TxState = 'idle' | 'connecting' | 'pending' | 'success' | 'fail';
@@ -44,78 +45,6 @@ function errorCopy(error: WalletError) {
     InsufficientBalance: 'Insufficient Testnet balance to cover network fees or budget requirements.',
   };
   return copy[error];
-}
-
-function readValue(value: any, keys: string[]) {
-  if (value && typeof value === 'object') {
-    for (const key of keys) {
-      if (key in value) return value[key];
-    }
-  }
-  return value;
-}
-
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
-async function connectFreighter() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) throw new Error('WalletNotFound');
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('WalletConnectionRejected');
-  return publicKey as string;
-}
-
-async function connectMetaMask() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts[0]) {
-        return accounts[0] as string;
-      }
-    } catch {
-      throw new Error('WalletConnectionRejected');
-    }
-  }
-  throw new Error('WalletNotFound');
-}
-
-async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
 }
 
 function makeEvent(label: string) {
@@ -142,41 +71,39 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
 
-  async function connectWallet(walletId = selectedWallet) {
-    setSelectedWallet(walletId);
+  async function connectWalletModal() {
     setTxState('connecting');
     setError('');
-    setPublicKey('');
     try {
-      let key = '';
-      if (walletId === 'freighter') {
-        key = await connectFreighter();
-      } else if (walletId === 'metamask') {
-        key = await connectMetaMask();
-      } else {
-        throw new Error('WalletNotFound');
-      }
-      setPublicKey(key);
-      setTxState('success');
-      setEvents((items) => [makeEvent(`${walletId.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
-      if (walletId === 'freighter') {
-        try {
-          const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
-          const account = await response.json();
-          const native = account.balances?.find((b: any) => b.asset_type === 'native');
-          setBalance(native?.balance ?? '0.0000000');
-        } catch {
-          setBalance('0.0000000');
+      await kit.openModal({
+        onWalletSelected: async (option: any) => {
+          try {
+            kit.setWallet(option.id);
+            setSelectedWallet(option.id);
+            const pubKey = await kit.getPublicKey();
+            setPublicKey(pubKey);
+            setTxState('success');
+            setEvents((items) => [makeEvent(`${option.name} linked: ${pubKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
+            
+            // fetch balance
+            try {
+              const response = await fetch(`${HORIZON_URL}/accounts/${pubKey}`);
+              const account = await response.json();
+              const native = account.balances?.find((b: any) => b.asset_type === 'native');
+              setBalance(native?.balance ?? '0.0000000');
+            } catch {
+              setBalance('0.0000000');
+            }
+          } catch (e: any) {
+            setTxState('fail');
+            setError('WalletConnectionRejected');
+            setEvents((items) => [makeEvent(`Failed link ${option.id}: WalletConnectionRejected`), ...items.slice(0, 7)]);
+          }
         }
-      } else {
-        setBalance('500.0000000');
-      }
-    } catch (caught: any) {
+      });
+    } catch (e) {
       setTxState('fail');
-      const nextError: WalletError = caught.message === 'WalletConnectionRejected' ? 'WalletConnectionRejected' : 'WalletNotFound';
-      setError(nextError);
-      setEvents((items) => [makeEvent(`Failed link ${walletId}: ${nextError}`), ...items.slice(0, 7)]);
+      setError('WalletNotFound');
     }
   }
 
@@ -198,24 +125,48 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
+    
+    // Check balance first
+    if (parseFloat(balance) < parseFloat(amount)) {
+      simulateError('InsufficientBalance');
+      return;
+    }
+
     setTxState('pending');
     setTxHash('');
     setEvents((items) => [makeEvent(`Allocating budget of ${amount} XLM to agent ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      if (selectedWallet === 'freighter') {
-        const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
-        setTxHash(hash);
-        setTxState('success');
-        setEvents((items) => [makeEvent(`Budget allocated. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      } else {
-        setTimeout(() => {
-          const hash = crypto.randomUUID().replace(/-/g, '');
-          setTxHash(hash);
-          setTxState('success');
-          setEvents((items) => [makeEvent(`MetaMask budget synced. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-        }, 1500);
-      }
+      const server = new StellarSdk.Horizon.Server(HORIZON_URL);
+      const source = await server.loadAccount(publicKey);
+      const fee = String(await server.fetchBaseFee());
+      const builder = new StellarSdk.TransactionBuilder(source, {
+        fee,
+        networkPassphrase: NETWORK_PASSPHRASE,
+      })
+        .addOperation(StellarSdk.Operation.payment({
+          destination: destination.trim(),
+          asset: StellarSdk.Asset.native(),
+          amount: amount.trim(),
+        }));
+
+      if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
+
+      const transaction = builder.setTimeout(60).build();
+      
+      const signedResult = await kit.signTx({
+        xdr: transaction.toXDR(),
+        publicKey: publicKey,
+        network: Networks.TESTNET
+      });
+
+      const signedTransaction = new StellarSdk.Transaction(signedResult.signedTxXdr || signedResult.signedXDR || signedResult, NETWORK_PASSPHRASE);
+      const submitted = await server.submitTransaction(signedTransaction);
+      
+      setTxHash(submitted.hash);
+      setTxState('success');
+      setEvents((items) => [makeEvent(`Budget allocated. Tx: ${submitted.hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+      
     } catch (err: any) {
       setTxState('fail');
       setEvents((items) => [makeEvent(`Allocation failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
@@ -228,15 +179,34 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
+    
     setTxState('pending');
+    setTxHash('');
     setEvents((items) => [makeEvent(`Invoking budget smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
-    setTimeout(() => {
-      const localHash = crypto.randomUUID().replace(/-/g, '');
-      setTxHash(localHash);
+    try {
+      const hash = await invokeContract(
+        publicKey,
+        contractValue,
+        async (xdr) => {
+          const res = await kit.signTx({
+            xdr,
+            publicKey,
+            network: Networks.TESTNET
+          });
+          return res.signedTxXdr || res.signedXDR || res;
+        }
+      );
+      
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Soroban budget limit locked`), ...items.slice(0, 7)]);
-    }, 1200);
+      setEvents((items) => [makeEvent(`Soroban budget limit locked. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+      
+    } catch (err: any) {
+      setTxState('fail');
+      setError('InsufficientBalance'); // or just show error
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message}`), ...items.slice(0, 7)]);
+    }
   }
 
   return (
@@ -275,7 +245,7 @@ export default function App() {
           </div>
 
           <button 
-            onClick={publicKey ? disconnectWallet : () => connectWallet()}
+            onClick={publicKey ? disconnectWallet : connectWalletModal}
             className={`px-5 py-2.5 rounded-full font-bold text-xs tracking-wider uppercase transition-all duration-300 ${
               publicKey 
                 ? 'bg-stone-200 hover:bg-stone-300 text-stone-800' 
@@ -350,11 +320,11 @@ export default function App() {
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
                     <span className="text-purple-650 font-bold">✓</span>
-                    <span className="text-xs text-stone-600">Freighter & MetaMask Active</span>
+                    <span className="text-xs text-stone-600">Actual WalletKit Enabled</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-purple-650 font-bold">✓</span>
-                    <span className="text-xs text-stone-600">Stellar Scribing Budget Tunnels</span>
+                    <span className="text-xs text-stone-600">Soroban Contract Invoked</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-purple-650 font-bold">✓</span>
@@ -384,26 +354,19 @@ export default function App() {
               <div className="glass-ai-card p-8 rounded-3xl flex flex-col gap-6 bg-white">
                 <h3 className="font-bold text-lg text-slate-900">Select Scribe Identity</h3>
                 <div className="flex flex-col gap-3">
-                  {walletOptions.map((wallet) => (
                     <button
-                      key={wallet.id}
-                      onClick={() => connectWallet(wallet.id)}
-                      className={`p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 ${
-                        selectedWallet === wallet.id 
-                          ? 'bg-purple-50 border-purple-500 text-white shadow-md' 
-                          : 'bg-stone-50 border-stone-200 text-stone-600 hover:text-stone-900 hover:border-stone-300'
-                      }`}
+                      onClick={connectWalletModal}
+                      className="p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 bg-purple-50 border-purple-500 text-purple-900 shadow-md"
                     >
                       <div className="flex items-center gap-4">
-                        <span className="text-2xl">{wallet.icon}</span>
+                        <span className="text-2xl">🔗</span>
                         <div className="text-left">
-                          <h4 className={`font-semibold text-sm ${selectedWallet === wallet.id ? 'text-white' : 'text-slate-800'}`}>{wallet.label}</h4>
-                          <span className={`text-xs ${selectedWallet === wallet.id ? 'text-purple-200' : 'text-slate-500'}`}>{wallet.note}</span>
+                          <h4 className="font-semibold text-sm">Open Stellar Wallets Kit</h4>
+                          <span className="text-xs text-purple-500">Supports Freighter, MetaMask, etc.</span>
                         </div>
                       </div>
                       <span className="text-xs font-mono">Link</span>
                     </button>
-                  ))}
                 </div>
               </div>
 
@@ -496,20 +459,14 @@ export default function App() {
                 {txHash && (
                   <div className="flex flex-col gap-2 mt-2">
                     <label className="text-xs uppercase tracking-wider text-slate-500 font-bold">Transaction Hash</label>
-                    {selectedWallet === 'freighter' ? (
-                      <a 
-                        href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="font-mono text-xs p-4 rounded-xl bg-slate-50 border border-stone-200 text-purple-600 hover:text-purple-750 transition-all text-center block break-all"
-                      >
-                        {txHash}
-                      </a>
-                    ) : (
-                      <div className="font-mono text-xs p-4 rounded-xl bg-slate-50 border border-stone-200 text-purple-600 text-center block break-all">
-                        {txHash} (Simulated EVM Budget Synced)
-                      </div>
-                    )}
+                    <a 
+                      href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="font-mono text-xs p-4 rounded-xl bg-slate-50 border border-stone-200 text-purple-600 hover:text-purple-750 transition-all text-center block break-all"
+                    >
+                      {txHash}
+                    </a>
                   </div>
                 )}
               </div>
@@ -558,9 +515,14 @@ export default function App() {
                 {txHash && (
                   <div className="flex flex-col gap-2 mt-2">
                     <label className="text-xs uppercase tracking-wider text-slate-500 font-bold">Transaction Hash</label>
-                    <div className="font-mono text-xs p-4 rounded-xl bg-slate-50 border border-stone-200 text-purple-600 text-center block break-all">
+                    <a 
+                      href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      className="font-mono text-xs p-4 rounded-xl bg-slate-50 border border-stone-200 text-purple-600 hover:text-purple-750 transition-all text-center block break-all"
+                    >
                       {txHash}
-                    </div>
+                    </a>
                   </div>
                 )}
               </div>

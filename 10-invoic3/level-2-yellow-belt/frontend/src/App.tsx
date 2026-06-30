@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { connectWalletKit } from './services/freighter';
+import { submitPayment, invokeContract, HORIZON_URL } from './services/stellar';
 
 const project = {
   "dir": "10-invoic3",
@@ -12,11 +14,8 @@ const project = {
   "accent": "#3b82f6",
   "contract": "Invoice Vault Smart Contract",
   "action": "Initialize Invoice Settlement",
-  "contractId": "CC3RINVOIC3VAULT...TESTNET"
+  "contractId": "CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH"
 };
-
-const HORIZON_URL = 'https://horizon-testnet.stellar.org';
-const TESTNET_PASSPHRASE = 'Test SDF Network ; September 2015';
 
 const pages = [
   { id: 'overview', label: 'Invoice Gates' },
@@ -25,13 +24,6 @@ const pages = [
   { id: 'contract', label: 'Soroban Invoice Contract' },
   { id: 'events', label: 'Invoice Ledger' },
 ] as const;
-
-const walletOptions = [
-  { id: 'freighter', label: 'Freighter Wallet', note: 'Stellar Extension', icon: '⚓' },
-  { id: 'metamask', label: 'MetaMask Wallet', note: 'EVM / Snap Integration', icon: '🦊' },
-  { id: 'xbull', label: 'xBull Wallet', note: 'Browser Extension', icon: '🐂' },
-  { id: 'lobstr', label: 'LOBSTR Wallet', note: 'WalletConnect Path', icon: '🦞' },
-];
 
 type PageId = (typeof pages)[number]['id'];
 type TxState = 'idle' | 'connecting' | 'pending' | 'success' | 'fail';
@@ -44,78 +36,6 @@ function errorCopy(error: WalletError) {
     InsufficientBalance: 'Insufficient Testnet balance to cover network fees or invoice requirements.',
   };
   return copy[error];
-}
-
-function readValue(value: any, keys: string[]) {
-  if (value && typeof value === 'object') {
-    for (const key of keys) {
-      if (key in value) return value[key];
-    }
-  }
-  return value;
-}
-
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
-async function connectFreighter() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) throw new Error('WalletNotFound');
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('WalletConnectionRejected');
-  return publicKey as string;
-}
-
-async function connectMetaMask() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts[0]) {
-        return accounts[0] as string;
-      }
-    } catch {
-      throw new Error('WalletConnectionRejected');
-    }
-  }
-  throw new Error('WalletNotFound');
-}
-
-async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
 }
 
 function makeEvent(label: string) {
@@ -142,41 +62,35 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
 
-  async function connectWallet(walletId = selectedWallet) {
-    setSelectedWallet(walletId);
+  async function connectWalletModal() {
     setTxState('connecting');
     setError('');
-    setPublicKey('');
     try {
-      let key = '';
-      if (walletId === 'freighter') {
-        key = await connectFreighter();
-      } else if (walletId === 'metamask') {
-        key = await connectMetaMask();
-      } else {
-        throw new Error('WalletNotFound');
-      }
-      setPublicKey(key);
-      setTxState('success');
-      setEvents((items) => [makeEvent(`${walletId.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
-      if (walletId === 'freighter') {
-        try {
-          const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
-          const account = await response.json();
-          const native = account.balances?.find((b: any) => b.asset_type === 'native');
-          setBalance(native?.balance ?? '0.0000000');
-        } catch {
-          setBalance('0.0000000');
+      await connectWalletKit(
+        async (walletId, pubKey) => {
+          setSelectedWallet(walletId);
+          setPublicKey(pubKey);
+          setTxState('success');
+          setEvents((items) => [makeEvent(`${walletId.toUpperCase()} linked: ${pubKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
+          
+          try {
+            const response = await fetch(`${HORIZON_URL}/accounts/${pubKey}`);
+            const account = await response.json();
+            const native = account.balances?.find((b: any) => b.asset_type === 'native');
+            setBalance(native?.balance ?? '0.0000000');
+          } catch {
+            setBalance('0.0000000');
+          }
+        },
+        (err) => {
+          setTxState('fail');
+          setError('WalletConnectionRejected');
+          setEvents((items) => [makeEvent(`Failed link: WalletConnectionRejected`), ...items.slice(0, 7)]);
         }
-      } else {
-        setBalance('950.0000000');
-      }
-    } catch (caught: any) {
+      );
+    } catch (e) {
       setTxState('fail');
-      const nextError: WalletError = caught.message === 'WalletConnectionRejected' ? 'WalletConnectionRejected' : 'WalletNotFound';
-      setError(nextError);
-      setEvents((items) => [makeEvent(`Failed link ${walletId}: ${nextError}`), ...items.slice(0, 7)]);
+      setError('WalletNotFound');
     }
   }
 
@@ -198,24 +112,21 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
+
+    if (parseFloat(balance) < parseFloat(amount)) {
+      simulateError('InsufficientBalance');
+      return;
+    }
+
     setTxState('pending');
     setTxHash('');
     setEvents((items) => [makeEvent(`Locking ${amount} XLM invoice settlement with vendor ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      if (selectedWallet === 'freighter') {
-        const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
-        setTxHash(hash);
-        setTxState('success');
-        setEvents((items) => [makeEvent(`Invoice vault initialized. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      } else {
-        setTimeout(() => {
-          const hash = crypto.randomUUID().replace(/-/g, '');
-          setTxHash(hash);
-          setTxState('success');
-          setEvents((items) => [makeEvent(`MetaMask invoice synced. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-        }, 1500);
-      }
+      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      setTxHash(hash);
+      setTxState('success');
+      setEvents((items) => [makeEvent(`Invoice vault initialized. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
       setEvents((items) => [makeEvent(`Invoice lock failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
@@ -231,12 +142,16 @@ export default function App() {
     setTxState('pending');
     setEvents((items) => [makeEvent(`Invoking invoice smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
-    setTimeout(() => {
-      const localHash = crypto.randomUUID().replace(/-/g, '');
-      setTxHash(localHash);
+    try {
+      const hash = await invokeContract(publicKey, contractValue);
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Invoice registered successfully`), ...items.slice(0, 7)]);
-    }, 1200);
+      setEvents((items) => [makeEvent(`Invoice registered successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    } catch (err: any) {
+      setTxState('fail');
+      setError('InsufficientBalance');
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message}`), ...items.slice(0, 7)]);
+    }
   }
 
   return (
@@ -274,7 +189,7 @@ export default function App() {
 
         <div className="flex flex-col gap-4">
           <button 
-            onClick={publicKey ? disconnectWallet : () => connectWallet()}
+            onClick={publicKey ? disconnectWallet : connectWalletModal}
             className={`w-full py-3.5 rounded-xl font-bold text-xs tracking-widest uppercase transition-all duration-300 shadow-sm ${
               publicKey 
                 ? 'bg-stone-200 hover:bg-stone-300 text-stone-850' 
@@ -303,10 +218,10 @@ export default function App() {
               </div>
             </div>
             <div className="flex gap-2">
-              <span className="text-xs px-3 py-1.5 rounded-full bg-stone-950 border border-stone-800 font-mono text-stone-300">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-stone-950 border border-stone-880 font-mono text-stone-300">
                 Vault Bal: {balance} XLM
               </span>
-              <span className="text-xs px-3 py-1.5 rounded-full bg-stone-950 border border-stone-800 font-mono text-stone-300">
+              <span className="text-xs px-3 py-1.5 rounded-full bg-stone-950 border border-stone-880 font-mono text-stone-300">
                 Identity: {selectedWallet.toUpperCase()}
               </span>
             </div>
@@ -351,11 +266,11 @@ export default function App() {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center gap-3">
                       <span className="text-blue-500 font-bold">✓</span>
-                      <span className="text-xs text-stone-400">Freighter & MetaMask Active</span>
+                      <span className="text-xs text-stone-400">Actual WalletKit Enabled</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-blue-500 font-bold">✓</span>
-                      <span className="text-xs text-stone-400">Invoice vault parameters lock</span>
+                      <span className="text-xs text-stone-400">Invoice Vault Invoked</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-blue-500 font-bold">✓</span>
@@ -385,26 +300,19 @@ export default function App() {
                 <div className="luxury-card p-8 rounded-3xl flex flex-col gap-6">
                   <h3 className="font-bold text-lg text-white">Select Scribe Identity</h3>
                   <div className="flex flex-col gap-3">
-                    {walletOptions.map((wallet) => (
                       <button
-                        key={wallet.id}
-                        onClick={() => connectWallet(wallet.id)}
-                        className={`p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 ${
-                          selectedWallet === wallet.id 
-                            ? 'bg-blue-900/10 border-blue-600 text-white shadow-md' 
-                            : 'bg-stone-950/60 border-stone-850 text-stone-400 hover:text-stone-200 hover:border-stone-800'
-                        }`}
+                        onClick={connectWalletModal}
+                        className="p-5 rounded-2xl border flex items-center justify-between transition-all duration-300 bg-blue-900/10 border-blue-600 text-white shadow-md"
                       >
                         <div className="flex items-center gap-4">
-                          <span className="text-2xl">{wallet.icon}</span>
+                          <span className="text-2xl">🔗</span>
                           <div className="text-left">
-                            <h4 className={`font-semibold text-sm ${selectedWallet === wallet.id ? 'text-white' : 'text-stone-300'}`}>{wallet.label}</h4>
-                            <span className={`text-xs ${selectedWallet === wallet.id ? 'text-blue-205' : 'text-stone-500'}`}>{wallet.note}</span>
+                            <h4 className="font-semibold text-sm">Open Stellar Wallets Kit</h4>
+                            <span className="text-xs text-blue-300">Supports Freighter, MetaMask, etc.</span>
                           </div>
                         </div>
                         <span className="text-xs font-mono">Link</span>
                       </button>
-                    ))}
                   </div>
                 </div>
 
@@ -497,20 +405,14 @@ export default function App() {
                   {txHash && (
                     <div className="flex flex-col gap-2 mt-2">
                       <label className="text-xs uppercase tracking-wider text-stone-500 font-bold">Transaction Hash</label>
-                      {selectedWallet === 'freighter' ? (
-                        <a 
-                          href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
-                          target="_blank" 
-                          rel="noreferrer"
-                          className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 hover:text-blue-450 transition-all text-center block break-all"
-                        >
-                          {txHash}
-                        </a>
-                      ) : (
-                        <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 text-center block break-all">
-                          {txHash} (Simulated EVM Invoice Synced)
-                        </div>
-                      )}
+                      <a 
+                        href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 hover:text-blue-450 transition-all text-center block break-all"
+                      >
+                        {txHash}
+                      </a>
                     </div>
                   )}
                 </div>
@@ -559,9 +461,14 @@ export default function App() {
                   {txHash && (
                     <div className="flex flex-col gap-2 mt-2">
                       <label className="text-xs uppercase tracking-wider text-stone-500 font-bold">Transaction Hash</label>
-                      <div className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 text-center block break-all">
+                      <a 
+                        href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="font-mono text-xs p-4 rounded-xl bg-stone-950 border border-stone-850 text-blue-500 hover:text-blue-450 transition-all text-center block break-all"
+                      >
                         {txHash}
-                      </div>
+                      </a>
                     </div>
                   )}
                 </div>
@@ -579,7 +486,7 @@ export default function App() {
                 <div className="luxury-card p-8 rounded-3xl flex flex-col gap-6">
                   <div className="text-center flex flex-col gap-2">
                     <h3 className="font-bold text-lg text-white">Invoice Event Log</h3>
-                    <p className="text-xs text-stone-500">Real-time state updates synchronized directly from Horizon ledger logs.</p>
+                    <p className="text-xs text-stone-550">Real-time state updates synchronized directly from Horizon ledger logs.</p>
                   </div>
 
                   <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto pr-1">
