@@ -1,3 +1,5 @@
+import { connectFreighter } from './services/freighter';
+import { fetchXlmBalance, submitPayment as submitStellarPayment } from './services/stellar';
 import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -44,67 +46,17 @@ function readValue(value: any, keys: string[]) {
   return value;
 }
 
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
 async function getFreighterPublicKey() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) {
-    throw new Error('Freighter wallet was not found. Please install the Freighter extension.');
-  }
-
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('Wallet connection was rejected.');
-  return publicKey as string;
+  const res = await connectFreighter();
+  return res.publicKey;
 }
 
 async function fetchNativeBalance(publicKey: string) {
-  const response = await fetch(`${HORIZON_URL}/accounts/${publicKey}`);
-  if (!response.ok) {
-    throw new Error(response.status === 404 ? 'Account not funded. Use Friendbot on the Wallet page.' : 'Could not fetch balance from Horizon.');
-  }
-  const account = await response.json();
-  const native = account.balances?.find((balance: any) => balance.asset_type === 'native');
-  return native?.balance ?? '0.0000000';
+  return await fetchXlmBalance(publicKey);
 }
 
 async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
+  return await submitStellarPayment(publicKey, destination, amount, memo);
 }
 
 export default function App() {
