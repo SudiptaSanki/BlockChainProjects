@@ -5,11 +5,15 @@ AgentPay is a premium decentralized AI budget allocation and payment gateway bui
 ---
 
 ## 📁 Project Structure
-The repository is organized into progressive levels:
-- `level-1-white-belt/frontend/`: React + Vite frontend implementing admin identity gateways and on-chain budget limits.
+The repository is organized into progressive levels with full Soroban smart contract source code visible at every level:
+- `level-1-white-belt/`:
+  - `frontend/`: React + Vite frontend implementing admin identity gateways and on-chain budget limits.
+  - `contracts/agent_budget/`: Soroban Rust smart contract source code (`Cargo.toml`, `src/lib.rs`).
 - `level-2-yellow-belt/`:
-  - `contracts/`: Soroban Rust smart contracts (agent_budget) managing budget gates and spend approvals.
-  - `frontend/`: React + Vite budget allocator dashboard.
+  - `contracts/agent_budget/`: Soroban Rust smart contracts managing budget gates and spend approvals.
+  - `frontend/`: React + Vite budget allocator dashboard with `@creit.tech/stellar-wallets-kit` integration.
+- `agent_budget/`: Top-level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
+- `contracts/agent_budget/`: Root level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
 
 ---
 
@@ -34,6 +38,7 @@ graph TD
 - **Horizon Balance Sync:** Retrieve and sync native XLM balances for the admin account.
 - **Budget Limit Lock:** Allocate funds to agent keys by submitting signed payments containing custom memo payloads.
 - **CLI Terminal Theme:** Styled on a minimalist monospace template (`#0d0d10`) using neon green text and border-lit boxes.
+- **Soroban Contracts:** Smart contract package located in `level-1-white-belt/contracts/agent_budget/` (`Cargo.toml`, `src/lib.rs`).
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -42,7 +47,7 @@ graph TD
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Run the Vite development server:
    ```bash
@@ -59,8 +64,8 @@ graph TD
 ## 🟡 Level 2: Yellow Belt (Smart Contracts & Event Sync)
 
 ### 📝 Requirements & Features
-- **Multi-Identity Hub:** Connect Freighter, MetaMask (EVM/Snap), xBull, or LOBSTR.
-- **Soroban Smart Contract:** Connects to the compiled Rust `AgentBudget` smart contract deployed on Stellar Testnet.
+- **Multi-Identity Hub:** Connect Freighter, MetaMask (EVM/Snap), xBull, or LOBSTR using `@creit.tech/stellar-wallets-kit`.
+- **Soroban Smart Contract:** Connects to the compiled Rust `agent_budget` smart contract deployed on Stellar Testnet located in `level-2-yellow-belt/contracts/agent_budget/`.
 - **Exception Compliance:** 3 handled error conditions (`WalletNotFound`, `WalletConnectionRejected`, `InsufficientBalance`).
 - **Spend Sync Stream:** Event log updating in real-time by querying Horizon spend transactions.
 - **AI Mesh Purple Theme:** Styled on a light lavender layout (`#fbfaff`) using purple node gradients and rounded glass cards.
@@ -72,7 +77,7 @@ graph TD
    ```
 2. Install the necessary dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Launch the development server:
    ```bash
@@ -83,6 +88,10 @@ graph TD
 Soroban contract ID - CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH
 
 Transaction Hash: 3688bc1ac19f75127493b052d523a7d636d21991f9ef9f15148a989ea2bc8cd8
+
+### 🔍 Proof of Deployed Testnet Contract & Transaction Links (Stellar Explorer)
+- **Deployed Testnet Contract Explorer:** [Stellar Expert - Contract CC2UJP6YAUW5...](https://stellar.expert/explorer/testnet/contract/CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+- **Verifiable Transaction Hash:** [Stellar Expert - Transaction Hash 3688bc1a...](https://stellar.expert/explorer/testnet/tx/3688bc1ac19f75127493b052d523a7d636d21991f9ef9f15148a989ea2bc8cd8)
 
 ### 📸 Submission Screenshots
 

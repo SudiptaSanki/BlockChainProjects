@@ -71,40 +71,34 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
 
-  async function connectWalletModal() {
+
+  async function connectWallet(walletId = selectedWallet) {
+    setSelectedWallet(walletId);
     setTxState('connecting');
     setError('');
-    try {
-      await kit.openModal({
-        onWalletSelected: async (option: any) => {
-          try {
-            kit.setWallet(option.id);
-            setSelectedWallet(option.id);
-            const pubKey = await kit.getPublicKey();
-            setPublicKey(pubKey);
-            setTxState('success');
-            setEvents((items) => [makeEvent(`${option.name} linked: ${pubKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
-            
-            // fetch balance
-            try {
-              const response = await fetch(`${HORIZON_URL}/accounts/${pubKey}`);
-              const account = await response.json();
-              const native = account.balances?.find((b: any) => b.asset_type === 'native');
-              setBalance(native?.balance ?? '0.0000000');
-            } catch {
-              setBalance('0.0000000');
-            }
-          } catch (e: any) {
-            setTxState('fail');
-            setError('WalletConnectionRejected');
-            setEvents((items) => [makeEvent(`Failed link ${option.id}: WalletConnectionRejected`), ...items.slice(0, 7)]);
-          }
+    setPublicKey('');
+    
+    await connectWalletKit(
+      async (id, key) => {
+        setPublicKey(key);
+        setTxState('success');
+        setEvents((items) => [makeEvent(`${id.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
+        
+        try {
+          const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
+          const account = await response.json();
+          const native = account.balances?.find((b: any) => b.asset_type === 'native');
+          setBalance(native?.balance ?? '0.0000000');
+        } catch {
+          setBalance('0.0000000');
         }
-      });
-    } catch (e) {
-      setTxState('fail');
-      setError('WalletNotFound');
-    }
+      },
+      (err) => {
+        setTxState('fail');
+        setError('WalletConnectionRejected');
+        setEvents((items) => [makeEvent(`Failed link ${walletId}: WalletConnectionRejected`), ...items.slice(0, 7)]);
+      }
+    );
   }
 
   function disconnectWallet() {
@@ -125,51 +119,18 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
-    
-    // Check balance first
-    if (parseFloat(balance) < parseFloat(amount)) {
-      simulateError('InsufficientBalance');
-      return;
-    }
-
     setTxState('pending');
     setTxHash('');
-    setEvents((items) => [makeEvent(`Allocating budget of ${amount} XLM to agent ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Locking ${amount} XLM agent budget with node ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-      const source = await server.loadAccount(publicKey);
-      const fee = String(await server.fetchBaseFee());
-      const builder = new StellarSdk.TransactionBuilder(source, {
-        fee,
-        networkPassphrase: NETWORK_PASSPHRASE,
-      })
-        .addOperation(StellarSdk.Operation.payment({
-          destination: destination.trim(),
-          asset: StellarSdk.Asset.native(),
-          amount: amount.trim(),
-        }));
-
-      if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-      const transaction = builder.setTimeout(60).build();
-      
-      const signedResult = await kit.signTx({
-        xdr: transaction.toXDR(),
-        publicKey: publicKey,
-        network: Networks.TESTNET
-      });
-
-      const signedTransaction = new StellarSdk.Transaction(signedResult.signedTxXdr || signedResult.signedXDR || signedResult, NETWORK_PASSPHRASE);
-      const submitted = await server.submitTransaction(signedTransaction);
-      
-      setTxHash(submitted.hash);
+      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Budget allocated. Tx: ${submitted.hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
+      setEvents((items) => [makeEvent(`Agent budget initialized. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
-      setEvents((items) => [makeEvent(`Allocation failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Agent budget lock failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
     }
   }
 
@@ -179,36 +140,19 @@ export default function App() {
       simulateError('WalletConnectionRejected');
       return;
     }
-    
     setTxState('pending');
-    setTxHash('');
-    setEvents((items) => [makeEvent(`Invoking budget smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Invoking agent budget smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
     try {
-      const hash = await invokeContract(
-        publicKey,
-        contractValue,
-        async (xdr) => {
-          const res = await kit.signTx({
-            xdr,
-            publicKey,
-            network: Networks.TESTNET
-          });
-          return res.signedTxXdr || res.signedXDR || res;
-        }
-      );
-      
+      const hash = await invokeContract(publicKey, 'initialize');
       setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Soroban budget limit locked. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
+      setEvents((items) => [makeEvent(`Agent budget locked successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
-      setError('InsufficientBalance'); // or just show error
-      setEvents((items) => [makeEvent(`Contract call failed: ${err.message}`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
     }
   }
-
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#fbfaff] text-slate-800 flex flex-col justify-between circuit-grid">
       {/* Violet Glows */}
