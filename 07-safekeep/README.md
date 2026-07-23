@@ -6,10 +6,14 @@ SafeKeep is a premium decentralized application (dApp) built on the Stellar netw
 
 ## 📁 Project Structure
 The repository is organized into progressive levels:
-- `level-1-white-belt/frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic asset vaulting on-chain.
+- `level-1-white-belt/`:
+  - `frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic asset vaulting on-chain.
+  - `contracts/recovery_vault/`: Soroban Rust smart contract source code (`Cargo.toml`, `src/lib.rs`).
 - `level-2-yellow-belt/`:
-  - `contracts/`: Soroban Rust smart contracts managing guardian registry and account social recovery logic.
+  - `contracts/recovery_vault/`: Soroban Rust smart contract managing guardian registry and account social recovery logic.
   - `frontend/`: React + Vite control center interacting with deployed contracts and supporting multi-wallet signatures.
+- `recovery_vault/`: Top-level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
+- `contracts/recovery_vault/`: Root level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
 
 ---
 
@@ -32,6 +36,7 @@ graph TD
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payment transactions to vault assets.
 - **UI/UX:** Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
+- **Soroban Contracts:** Smart contract package located in `level-1-white-belt/contracts/recovery_vault/` (`Cargo.toml`, `src/lib.rs`).
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -58,7 +63,7 @@ graph TD
 
 ### 📝 Requirements & Features
 - **Multi-Wallet Support:** Seamless selection panel supporting Freighter, MetaMask (via EVM-to-Stellar Snaps), xBull, and LOBSTR.
-- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet.
+- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet located in `level-2-yellow-belt/contracts/recovery_vault/`.
 - **On-chain Sync:** Real-time event subscription log mirroring smart contract state and social recovery events.
 - **Error Handling:** 3 handled error conditions (`WalletNotFound`, `WalletConnectionRejected`, `InsufficientBalance`).
 - **Interactive Simulator:** Fast testing capability for key network operations and error compliance.
