@@ -6,10 +6,14 @@ TokenVest is a premium decentralized token vesting and lockup system built on th
 
 ## 📁 Project Structure
 The repository is organized into progressive levels:
-- `level-1-white-belt/frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic vesting vault creation.
+- `level-1-white-belt/`:
+  - `frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic vesting vault creation.
+  - `contracts/vesting/`: Soroban Rust smart contract source code (`Cargo.toml`, `src/lib.rs`).
 - `level-2-yellow-belt/`:
-  - `contracts/`: Soroban Rust smart contracts managing vesting schedules and distribution.
+  - `contracts/vesting/`: Soroban Rust smart contract managing vesting schedules and distribution.
   - `frontend/`: React + Vite multi-wallet vesting console and investor dashboard.
+- `vesting/`: Top-level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
+- `contracts/vesting/`: Root level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
 
 ---
 
@@ -34,6 +38,7 @@ graph TD
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
 - **Transaction Submission:** Submit signed XLM payments to lock vesting tokens on-chain.
 - **UI/UX**: Luxury classical academia design with calligraphy headings, Left Light Sidebar layout, and an active dark luxury background.
+- **Soroban Contracts:** Smart contract package located in `level-1-white-belt/contracts/vesting/` (`Cargo.toml`, `src/lib.rs`).
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -42,7 +47,7 @@ graph TD
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Run the Vite development server:
    ```bash
@@ -60,7 +65,7 @@ graph TD
 
 ### 📝 Requirements & Features
 - **Multi-Wallet Support:** Seamless selection panel for Freighter, MetaMask (EVM/Snap), xBull, and LOBSTR.
-- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet.
+- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet located in `level-2-yellow-belt/contracts/vesting/`.
 - **On-chain Sync:** Real-time event subscription log mirroring smart contract state.
 - **Error Handling:** 3 handled error conditions (`WalletNotFound`, `WalletConnectionRejected`, `InsufficientBalance`).
 - **Interactive Simulator:** Fast testing capability for key network operations.
@@ -72,7 +77,7 @@ graph TD
    ```
 2. Install the necessary dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Launch the development server:
    ```bash

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { connectWalletKit } from './services/freighter';
+import { submitPayment, invokeContract } from './services/stellar';
+
 
 const project = {
   "dir": "11-tokenvest",
@@ -12,7 +15,7 @@ const project = {
   "accent": "#059669",
   "contract": "Vesting Vault Smart Contract",
   "action": "Initialize Vesting Vault",
-  "contractId": "CC3RTOKENVEST...TESTNET"
+  "contractId": "CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH"
 };
 
 const HORIZON_URL = 'https://horizon-testnet.stellar.org';
@@ -46,78 +49,6 @@ function errorCopy(error: WalletError) {
   return copy[error];
 }
 
-function readValue(value: any, keys: string[]) {
-  if (value && typeof value === 'object') {
-    for (const key of keys) {
-      if (key in value) return value[key];
-    }
-  }
-  return value;
-}
-
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
-async function connectFreighter() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) throw new Error('WalletNotFound');
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('WalletConnectionRejected');
-  return publicKey as string;
-}
-
-async function connectMetaMask() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts[0]) {
-        return accounts[0] as string;
-      }
-    } catch {
-      throw new Error('WalletConnectionRejected');
-    }
-  }
-  throw new Error('WalletNotFound');
-}
-
-async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
-}
-
 function makeEvent(label: string) {
   return { id: crypto.randomUUID(), label, time: new Date().toLocaleTimeString() };
 }
@@ -142,25 +73,19 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
 
+
   async function connectWallet(walletId = selectedWallet) {
     setSelectedWallet(walletId);
     setTxState('connecting');
     setError('');
     setPublicKey('');
-    try {
-      let key = '';
-      if (walletId === 'freighter') {
-        key = await connectFreighter();
-      } else if (walletId === 'metamask') {
-        key = await connectMetaMask();
-      } else {
-        throw new Error('WalletNotFound');
-      }
-      setPublicKey(key);
-      setTxState('success');
-      setEvents((items) => [makeEvent(`${walletId.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
-      if (walletId === 'freighter') {
+    
+    await connectWalletKit(
+      async (id, key) => {
+        setPublicKey(key);
+        setTxState('success');
+        setEvents((items) => [makeEvent(`${id.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
+        
         try {
           const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
           const account = await response.json();
@@ -169,15 +94,13 @@ export default function App() {
         } catch {
           setBalance('0.0000000');
         }
-      } else {
-        setBalance('850.0000000');
+      },
+      (err) => {
+        setTxState('fail');
+        setError('WalletConnectionRejected');
+        setEvents((items) => [makeEvent(`Failed link ${walletId}: WalletConnectionRejected`), ...items.slice(0, 7)]);
       }
-    } catch (caught: any) {
-      setTxState('fail');
-      const nextError: WalletError = caught.message === 'WalletConnectionRejected' ? 'WalletConnectionRejected' : 'WalletNotFound';
-      setError(nextError);
-      setEvents((items) => [makeEvent(`Failed link ${walletId}: ${nextError}`), ...items.slice(0, 7)]);
-    }
+    );
   }
 
   function disconnectWallet() {
@@ -203,19 +126,10 @@ export default function App() {
     setEvents((items) => [makeEvent(`Locking ${amount} XLM vesting schedule with beneficiary ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      if (selectedWallet === 'freighter') {
-        const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
-        setTxHash(hash);
-        setTxState('success');
-        setEvents((items) => [makeEvent(`Vesting schedule initialized. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      } else {
-        setTimeout(() => {
-          const hash = crypto.randomUUID().replace(/-/g, '');
-          setTxHash(hash);
-          setTxState('success');
-          setEvents((items) => [makeEvent(`MetaMask vesting synced. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-        }, 1500);
-      }
+      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      setTxHash(hash);
+      setTxState('success');
+      setEvents((items) => [makeEvent(`Vesting schedule initialized. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
       setEvents((items) => [makeEvent(`Vesting schedule lock failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
@@ -231,14 +145,16 @@ export default function App() {
     setTxState('pending');
     setEvents((items) => [makeEvent(`Invoking vesting smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
-    setTimeout(() => {
-      const localHash = crypto.randomUUID().replace(/-/g, '');
-      setTxHash(localHash);
+    try {
+      const hash = await invokeContract(publicKey, 'initialize');
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Vesting schedule locked successfully`), ...items.slice(0, 7)]);
-    }, 1200);
+      setEvents((items) => [makeEvent(`Vesting schedule locked successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    } catch (err: any) {
+      setTxState('fail');
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+    }
   }
-
   return (
     <div className="min-h-screen flex relative overflow-hidden pic-bg-overlay">
       
