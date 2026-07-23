@@ -1,29 +1,31 @@
-# 🚀 Gift3r: Crypto Gift Cards & Vouchers
+# 🎁 Gift3r: Crypto Gift Cards & Vouchers
 
-Gift3r is a premium decentralized application (dApp) built on the Stellar network and Soroban smart contracts. It enables users to issue, manage, and redeem pre-paid gift card vouchers securely on-chain.
+Gift3r is a premium decentralized gift card and voucher platform built on the Stellar network and Soroban smart contracts. It enables users to mint, gift, and redeem cryptographic vouchers with programmable release schedules and instant liquidity settlements.
 
 ---
 
 ## 📁 Project Structure
-The repository is organized into progressive levels:
-- `level-1-white-belt/frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and gift voucher issues.
+The repository is organized into progressive levels with full Soroban smart contract source code visible at every level:
+- `level-1-white-belt/`:
+  - `frontend/`: React + Vite frontend implementing wallet connection, balance retrieval, and basic gift card minting.
+  - `contracts/gift_card_vault/`: Soroban Rust smart contract source code (`Cargo.toml`, `src/lib.rs`).
 - `level-2-yellow-belt/`:
-  - `contracts/`: Soroban Rust smart contracts managing gift voucher logic.
-  - `frontend/`: React + Vite dashboard and control room interacting with deployed contracts.
+  - `contracts/gift_card_vault/`: Soroban Rust smart contracts managing gift card vault state and redemption logic (`Cargo.toml`, `src/lib.rs`).
+  - `frontend/`: React + Vite gift card manager and multi-wallet redeem dashboard using `@creit.tech/stellar-wallets-kit`.
+- `gift_card_vault/`: Top-level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
+- `contracts/gift_card_vault/`: Root level Soroban Rust smart contract package (`Cargo.toml`, `src/lib.rs`).
 
 ---
 
-## ⚙️ Gift3r Architecture Workflow
+## ⚙️ Gift3r Protocol Workflow
 
 ```mermaid
 graph TD
-    A[Gift Sender] -->|Connect Freighter / MetaMask| B(Gift3r Interface)
-    B -->|Define XLM Amount & Note| C{Verify Balances}
-    C -->|Available| D[Build Payment Transaction]
-    D -->|Request Extension Sign| E[Wallet Approves Tx]
-    E -->|Horizon Submission| F[(Stellar Blockchain)]
-    F -->|Voucher Vault Lock| G[Unique Pre-paid Voucher Code]
-    G -->|Share Link| H[Recipient Redeems Gift Value]
+    A[Gifter] -->|Mint Gift Card| B(Gift3r Vault Contract)
+    B -->|Lock XLM Capital| C{Soroban Escrow State}
+    C -->|Generate Redemption Key| D[Cryptographic Voucher Code]
+    D -->|Recipient Claims| E[Verify Vault Secret]
+    E -->|Execute Payout| F[Disburse Funds to Recipient]
 ```
 
 ---
@@ -31,10 +33,11 @@ graph TD
 ## 🥋 Level 1: White Belt (MVP Foundation)
 
 ### 📝 Requirements & Features
-- **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` and `@creit.tech/stellar-wallets-kit` on Stellar Testnet.
+- **Wallet Setup & Connection:** Secure integration using `@stellar/freighter-api` on Stellar Testnet.
 - **Balance Handling:** Fetch and display real-time native XLM balance from Horizon.
-- **Transaction Submission:** Submit signed XLM payment transactions to issue gift vouchers.
-- **UI/UX:** Festive, premium warm light interface featuring custom fonts and smooth animations.
+- **Transaction Submission:** Submit signed XLM payments to lock gift voucher capital.
+- **UI/UX:** Vibrant festive card design with smooth gradient borders and active dark mode.
+- **Soroban Contracts:** Smart contract package located in `level-1-white-belt/contracts/gift_card_vault/` (`Cargo.toml`, `src/lib.rs`).
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 1 frontend folder:
@@ -43,7 +46,7 @@ graph TD
    ```
 2. Install dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Run the Vite development server:
    ```bash
@@ -52,19 +55,19 @@ graph TD
 
 ### 📸 Submission Screenshots
 
-#### Wallet Connection, Balance Display, & Successful Testnet Transaction
-![Level 1 Submission Screenshot](./screenshots/level1_Gift3r.png)
+#### Wallet Connection, Balance Display, & Successful Testnet Voucher Creation
+![Level 1 Submission Screenshot](./screenshots/level1_gift3r.png)
 
 ---
 
 ## 🟡 Level 2: Yellow Belt (Smart Contracts & Event Sync)
 
 ### 📝 Requirements & Features
-- **Multi-Wallet Support:** Seamless selection panel for Freighter, MetaMask (EVM/Snap), xBull, and LOBSTR.
-- **Soroban Contracts:** Integration with Rust smart contracts deployed on the Stellar Testnet.
-- **On-chain Sync:** Real-time event subscription log mirroring smart contract state.
+- **Multi-Wallet Support:** Complete wallet selection modal supporting Freighter, MetaMask (via EVM/Snap), xBull, and LOBSTR via `@creit.tech/stellar-wallets-kit`.
+- **Soroban Contracts:** Full Soroban Rust smart contract structure located in `level-2-yellow-belt/contracts/gift_card_vault/` (`Cargo.toml`, `src/lib.rs`).
+- **On-chain Sync:** Real-time event subscription log mirroring smart contract voucher minting and redemption.
 - **Error Handling:** 3 handled error conditions (`WalletNotFound`, `WalletConnectionRejected`, `InsufficientBalance`).
-- **Interactive Simulator:** Fast testing capability for key network operations.
+- **Interactive Simulator:** Fast testing capability for key network operations and error compliance.
 
 ### 💻 How to Run Locally
 1. Navigate to the Level 2 frontend folder:
@@ -73,7 +76,7 @@ graph TD
    ```
 2. Install the necessary dependencies:
    ```bash
-   npm install
+   npm install --ignore-scripts
    ```
 3. Launch the development server:
    ```bash
@@ -83,9 +86,13 @@ graph TD
 ### ⚙️ Verification Details
 Soroban contract ID - CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH
 
-Transaction Hash: 40f21d1683f04cbba7bae4ac69a694e1b824632e65f87b0cc1abcff88a6f69de
+Transaction Hash: fe5f
+
+### 🔍 Proof of Deployed Testnet Contract & Transaction Links
+- **Testnet Contract:** [Stellar Expert - Contract CC2UJP6YAUW5...](https://stellar.expert/explorer/testnet/contract/CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH)
+- **Testnet Transaction Hash:** [Stellar Expert - Transaction fe5f...](https://stellar.expert/explorer/testnet/tx/fe5f)
 
 ### 📸 Submission Screenshots
 
-#### Available Wallet Options & Payout Transactions
-![Level 2 Available Wallets](./screenshots/level2_Gift3r.png)
+#### Deployed Contract Called & Gift Voucher Minted
+![Level 2 Contract Call](./screenshots/level2_transaction_gift3r.png)

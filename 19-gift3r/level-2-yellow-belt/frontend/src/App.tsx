@@ -46,78 +46,6 @@ function errorCopy(error: WalletError) {
   return copy[error];
 }
 
-function readValue(value: any, keys: string[]) {
-  if (value && typeof value === 'object') {
-    for (const key of keys) {
-      if (key in value) return value[key];
-    }
-  }
-  return value;
-}
-
-async function loadFreighter() {
-  return await import('@stellar/freighter-api') as any;
-}
-
-async function connectFreighter() {
-  const freighter = await loadFreighter();
-  const connectedResult = freighter.isConnected ? await freighter.isConnected() : true;
-  const installed = Boolean(readValue(connectedResult, ['isConnected', 'isAvailable', 'result']));
-  if (!installed && !freighter.getAddress && !freighter.getPublicKey) throw new Error('WalletNotFound');
-  if (freighter.setAllowed) await freighter.setAllowed();
-  if (freighter.requestAccess) await freighter.requestAccess();
-  const addressResult = freighter.getAddress ? await freighter.getAddress() : await freighter.getPublicKey();
-  const publicKey = readValue(addressResult, ['address', 'publicKey', 'result']);
-  if (!publicKey) throw new Error('WalletConnectionRejected');
-  return publicKey as string;
-}
-
-async function connectMetaMask() {
-  if (typeof window !== 'undefined' && (window as any).ethereum) {
-    try {
-      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
-      if (accounts && accounts[0]) {
-        return accounts[0] as string;
-      }
-    } catch {
-      throw new Error('WalletConnectionRejected');
-    }
-  }
-  throw new Error('WalletNotFound');
-}
-
-async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
-  const StellarSdk = await import('@stellar/stellar-sdk') as any;
-  const freighter = await loadFreighter();
-  const server = new StellarSdk.Horizon.Server(HORIZON_URL);
-  const source = await server.loadAccount(publicKey);
-  const fee = String(await server.fetchBaseFee());
-  const builder = new StellarSdk.TransactionBuilder(source, {
-    fee,
-    networkPassphrase: TESTNET_PASSPHRASE,
-  })
-    .addOperation(StellarSdk.Operation.payment({
-      destination,
-      asset: StellarSdk.Asset.native(),
-      amount,
-    }));
-
-  if (memo.trim()) builder.addMemo(StellarSdk.Memo.text(memo.trim().slice(0, 28)));
-
-  const transaction = builder.setTimeout(60).build();
-  const signedResult = await freighter.signTransaction(transaction.toXDR(), {
-    networkPassphrase: TESTNET_PASSPHRASE,
-    network: 'TESTNET',
-    accountToSign: publicKey,
-  });
-  const signedXdr = readValue(signedResult, ['signedTxXdr', 'signedXDR', 'result']);
-  if (!signedXdr) throw new Error('Freighter did not return a signed transaction.');
-
-  const signedTransaction = new StellarSdk.Transaction(signedXdr, TESTNET_PASSPHRASE);
-  const submitted = await server.submitTransaction(signedTransaction);
-  return submitted.hash as string;
-}
-
 function makeEvent(label: string) {
   return { id: crypto.randomUUID(), label, time: new Date().toLocaleTimeString() };
 }
@@ -142,25 +70,19 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'No wallet active';
 
+
   async function connectWallet(walletId = selectedWallet) {
     setSelectedWallet(walletId);
     setTxState('connecting');
     setError('');
     setPublicKey('');
-    try {
-      let key = '';
-      if (walletId === 'freighter') {
-        key = await connectFreighter();
-      } else if (walletId === 'metamask') {
-        key = await connectMetaMask();
-      } else {
-        throw new Error('WalletNotFound');
-      }
-      setPublicKey(key);
-      setTxState('success');
-      setEvents((items) => [makeEvent(`${walletId.toUpperCase()} wallet authorized: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      
-      if (walletId === 'freighter') {
+    
+    await connectWalletKit(
+      async (id, key) => {
+        setPublicKey(key);
+        setTxState('success');
+        setEvents((items) => [makeEvent(`${id.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
+        
         try {
           const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
           const account = await response.json();
@@ -169,22 +91,20 @@ export default function App() {
         } catch {
           setBalance('0.0000000');
         }
-      } else {
-        setBalance('250.0000000'); // Mock EVM balance
+      },
+      (err) => {
+        setTxState('fail');
+        setError('WalletConnectionRejected');
+        setEvents((items) => [makeEvent(`Failed link ${walletId}: WalletConnectionRejected`), ...items.slice(0, 7)]);
       }
-    } catch (caught: any) {
-      setTxState('fail');
-      const nextError: WalletError = caught.message === 'WalletConnectionRejected' ? 'WalletConnectionRejected' : 'WalletNotFound';
-      setError(nextError);
-      setEvents((items) => [makeEvent(`Failed to connect ${walletId}: ${nextError}`), ...items.slice(0, 7)]);
-    }
+    );
   }
 
   function disconnectWallet() {
     setPublicKey('');
     setBalance('0.0000000');
     setTxState('idle');
-    setEvents((items) => [makeEvent('Wallet disconnected'), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent('Wallet unlinked'), ...items.slice(0, 7)]);
   }
 
   function simulateError(nextError: WalletError) {
@@ -200,25 +120,16 @@ export default function App() {
     }
     setTxState('pending');
     setTxHash('');
-    setEvents((items) => [makeEvent(`Initiating voucher issue of ${amount} XLM...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Minting ${amount} XLM gift card for recipient ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
 
     try {
-      if (selectedWallet === 'freighter') {
-        const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
-        setTxHash(hash);
-        setTxState('success');
-        setEvents((items) => [makeEvent(`Voucher issued on Testnet. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-      } else {
-        setTimeout(() => {
-          const hash = crypto.randomUUID().replace(/-/g, '');
-          setTxHash(hash);
-          setTxState('success');
-          setEvents((items) => [makeEvent(`MetaMask Bridge voucher issued. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
-        }, 1500);
-      }
+      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      setTxHash(hash);
+      setTxState('success');
+      setEvents((items) => [makeEvent(`Gift card minted successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
-      setEvents((items) => [makeEvent(`Voucher generation failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Gift card mint failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
     }
   }
 
@@ -229,16 +140,18 @@ export default function App() {
       return;
     }
     setTxState('pending');
-    setEvents((items) => [makeEvent(`Invoking lock contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Invoking gift card vault smart contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
-    setTimeout(() => {
-      const localHash = crypto.randomUUID().replace(/-/g, '');
-      setTxHash(localHash);
+    try {
+      const hash = await invokeContract(publicKey, 'initialize');
+      setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Contract state synchronized`), ...items.slice(0, 7)]);
-    }, 1200);
+      setEvents((items) => [makeEvent(`Gift card vault locked successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    } catch (err: any) {
+      setTxState('fail');
+      setEvents((items) => [makeEvent(`Contract call failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+    }
   }
-
   return (
     <div className="min-height-screen relative overflow-hidden bg-slate-950 text-slate-100 flex flex-col justify-between">
       {/* Background blobs */}
