@@ -36,8 +36,10 @@ export async function submitPayment(publicKey: string, destination: string, amou
   }
 
   const transaction = builder.setTimeout(60).build();
-  
-  const signedResult = await signTransaction(transaction.toXDR(), {
+  const xdr = transaction.toXDR();
+
+  // Mandatory Step 3: Unconditional Freighter transaction signing
+  const signedResult = await signTransaction(xdr, {
     networkPassphrase: StellarSdk.Networks.TESTNET,
     network: 'TESTNET',
     accountToSign: publicKey,
@@ -45,7 +47,7 @@ export async function submitPayment(publicKey: string, destination: string, amou
 
   const signedXdr = typeof signedResult === 'string' ? signedResult : (signedResult as any)?.signedTxXdr || (signedResult as any)?.signedXDR || (signedResult as any)?.result;
   if (!signedXdr) {
-    throw new Error('Freighter did not return a signed transaction.');
+    throw new Error('Freighter transaction signing failed: No signed XDR returned.');
   }
 
   const signedTransaction = new StellarSdk.Transaction(signedXdr, StellarSdk.Networks.TESTNET);

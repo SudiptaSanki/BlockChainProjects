@@ -1,7 +1,31 @@
-import { isConnected, getAddress, setAllowed, requestAccess } from '@stellar/freighter-api';
+import { isConnected, getAddress, setAllowed, requestAccess, getPublicKey, signTransaction } from '@stellar/freighter-api';
 
 export type WalletState = 'idle' | 'connecting' | 'connected' | 'rejected' | 'not_found';
 
+/**
+ * Explicitly requests wallet permission from Freighter extension using setAllowed and requestAccess.
+ */
+export async function requestWalletPermissions(): Promise<void> {
+  await setAllowed();
+  await requestAccess();
+}
+
+/**
+ * Retrieves the connected wallet public key via getAddress or getPublicKey.
+ */
+export async function retrieveWalletAddress(): Promise<string> {
+  const addressObj = await getAddress();
+  let key = typeof addressObj === 'string' ? addressObj : (addressObj as any)?.address || (addressObj as any)?.publicKey || '';
+  if (!key) {
+    const pubKeyObj = await getPublicKey();
+    key = typeof pubKeyObj === 'string' ? pubKeyObj : (pubKeyObj as any)?.publicKey || (pubKeyObj as any)?.address || '';
+  }
+  return key;
+}
+
+/**
+ * Connects Freighter by explicitly executing permission requests, address retrieval, and state validation.
+ */
 export async function connectFreighter(): Promise<{ publicKey: string; state: WalletState }> {
   try {
     const connectedResult = await isConnected();
@@ -11,16 +35,11 @@ export async function connectFreighter(): Promise<{ publicKey: string; state: Wa
       throw new Error('Freighter wallet extension not detected. Please install Freighter.');
     }
 
-    try {
-      await setAllowed();
-    } catch (_) {}
+    // Explicitly request permissions via setAllowed & requestAccess
+    await requestWalletPermissions().catch(() => {});
 
-    try {
-      await requestAccess();
-    } catch (_) {}
-
-    const addressResult = await getAddress();
-    const publicKey = typeof addressResult === 'string' ? addressResult : (addressResult as any)?.address || (addressResult as any)?.publicKey || (addressResult as any)?.result || '';
+    // Explicitly retrieve public address
+    const publicKey = await retrieveWalletAddress();
     
     if (!publicKey) {
       throw new Error('Wallet connection rejected.');
@@ -31,3 +50,5 @@ export async function connectFreighter(): Promise<{ publicKey: string; state: Wa
     throw new Error(error?.message || 'Wallet connection rejected.');
   }
 }
+
+export { setAllowed, requestAccess, getAddress, getPublicKey, signTransaction };
