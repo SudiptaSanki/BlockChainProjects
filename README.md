@@ -1,66 +1,80 @@
 # Blockchain Projects Hub
 
-This repository contains 20 unique decentralized applications (dApps) built on Stellar and Soroban.
+This repository contains 25 unique decentralized applications (dApps) built on Stellar and Soroban.
 
 ## Projects
 
-
 ### 1. [01 Vesta Payroll](./01-vesta-payroll)
-This is project 1 in the suite.
+Salary streaming dashboard for employers and employees.
 
 ### 2. [02 Splitwise Web3](./02-splitwise-web3)
-This is project 2 in the suite.
+On-chain shared expense settlement.
 
 ### 3. [03 Autodca](./03-autodca)
-This is project 3 in the suite.
+Automated dollar-cost averaging on Stellar.
 
 ### 4. [04 Milestone Crowdfund](./04-milestone-crowdfund)
-This is project 4 in the suite.
+Milestone-based crowdfunding escrow.
 
 ### 5. [05 Directremit](./05-directremit)
-This is project 5 in the suite.
+Cross-border remittance interface.
 
 ### 6. [06 Anchorstream](./06-anchorstream)
-This is project 6 in the suite.
+Merchant mobile money gateway.
 
 ### 7. [07 Safekeep](./07-safekeep)
-This is project 7 in the suite.
+Social recovery vault.
 
 ### 8. [08 Kidvault](./08-kidvault)
-This is project 8 in the suite.
+Time-locked allowance vault.
 
 ### 9. [09 Teamvault](./09-teamvault)
-This is project 9 in the suite.
+Multi-signature team treasury.
 
 ### 10. [10 Invoic3](./10-invoic3)
-This is project 10 in the suite.
+Cryptographic invoice payment router.
 
 ### 11. [11 Tokenvest](./11-tokenvest)
-This is project 11 in the suite.
+Token vesting and lockup manager.
 
 ### 12. [12 Stellarescrow](./12-stellarescrow)
-This is project 12 in the suite.
+Trustless P2P escrow.
 
 ### 13. [13 Agentpay](./13-agentpay)
-This is project 13 in the suite.
+AI agent billing and budget limits.
 
 ### 14. [14 Billsplitter Ai](./14-billsplitter-ai)
-This is project 14 in the suite.
+AI receipt splitting and settlement.
 
 ### 15. [15 Stellarscribe](./15-stellarscribe)
-This is project 15 in the suite.
+AI expense auditing and reimbursements.
 
 ### 16. [16 Ecofund](./16-ecofund)
-This is project 16 in the suite.
+Tokenized carbon offset retirement.
 
 ### 17. [17 Yieldanchor](./17-yieldanchor)
-This is project 17 in the suite.
+DeFi savings yield optimizer.
 
 ### 18. [18 Micropay](./18-micropay)
-This is project 18 in the suite.
+Pay-per-view content gateway and streaming micropayments.
 
-### 19. [19 Gift3R](./19-gift3r)
-This is project 19 in the suite.
+### 19. [19 Gift3r](./19-gift3r)
+Crypto gift cards and merchant redemption.
 
 ### 20. [20 Collateralize](./20-collateralize)
-This is project 20 in the suite.
+P2P crypto loans with collateral health.
+
+### 21. [21 AuraMint](./21-AuraMint-main)
+On-chain NFT & Asset Minting Vaults.
+
+### 22. [22 BlockFund](./22-BlockFund-main)
+Trustless Milestone Crowdfunding Vaults.
+
+### 23. [23 LedgerTrack](./23-LedgerTrack-main)
+Immutable Payment Tracking & Invoicing.
+
+### 24. [24 NexusSwap](./24-NexusSwap-main)
+Instant Cross-Asset Token Swap Portal.
+
+### 25. [25 PulsePoll](./25-PulsePoll-main)
+Trustless Community Governance & Voting.
