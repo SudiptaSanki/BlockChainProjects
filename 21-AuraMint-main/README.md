@@ -103,3 +103,6 @@ Transaction Hash: a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcde
 
 #### Deployed Smart Contract Called & Action Executed
 ![Level 2 Contract Call](./screenshots/level2_transaction_auramint.png)
+
+#### Mobile Responsive UI
+![Level 2 Mobile UI](./screenshots/level2_mobile_auramint.png)
