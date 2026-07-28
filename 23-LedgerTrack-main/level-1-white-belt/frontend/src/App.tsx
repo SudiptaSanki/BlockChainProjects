@@ -5,7 +5,7 @@ import { fetchXlmBalance, submitPayment, FRIENDBOT_URL } from './services/stella
 export default function App() {
   const [publicKey, setPublicKey] = useState('');
   const [balance, setBalance] = useState('0.0000000');
-  const [destination, setDestination] = useState('GBRPYHIL2CI3FNQ4BXLFMNDLFWPU2HY4LNSXYTWRAA36REDWBYV3P5BY');
+  const [destination, setDestination] = useState('');
   const [amount, setAmount] = useState('10');
   const [memo, setMemo] = useState('LedgerTrack Action');
   const [state, setState] = useState<'idle' | 'connecting' | 'connected' | 'loading' | 'submitting' | 'success' | 'failure'>('idle');
