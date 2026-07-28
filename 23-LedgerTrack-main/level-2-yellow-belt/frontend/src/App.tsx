@@ -18,7 +18,7 @@ const HORIZON_URL = 'https://horizon-testnet.stellar.org';
 const pages = [
   { id: 'overview', label: 'Overview' },
   { id: 'wallets', label: 'Multi-Wallet Signatures' },
-  { id: 'transfer', label: 'Execute Action' },
+  { id: 'transfer', label: 'Record Audit' },
   { id: 'contract', label: 'Soroban Smart Contract' },
   { id: 'events', label: 'Event Ledger' },
 ] as const;
@@ -57,11 +57,11 @@ export default function App() {
   const [contractAddress] = useState(project.contractId);
   const [txHash, setTxHash] = useState('');
   const [destination, setDestination] = useState('GBRPYHIL2CI3FNQ4BXLFMNDLFWPU2HY4LNSXYTWRAA36REDWBYV3P5BY');
-  const [amount, setAmount] = useState('100');
-  const [memo, setMemo] = useState('LedgerTrack Action');
+  const [amount, setAmount] = useState('50');
+  const [memo, setMemo] = useState('Audit Voucher #1042');
   const [events, setEvents] = useState([
-    makeEvent('Horizon gateway synced'),
-    makeEvent('Soroban smart contract active')
+    makeEvent('Ledger audit stream online'),
+    makeEvent('Payment tracker contract authenticated')
   ]);
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
@@ -115,16 +115,16 @@ export default function App() {
     }
     setTxState('pending');
     setTxHash('');
-    setEvents((items) => [makeEvent(`Submitting ${amount} XLM transaction to ${destination.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Recording audit payload of ${amount} XLM...`), ...items.slice(0, 7)]);
 
     try {
       const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
       setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Transaction confirmed. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Audit log registered. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
-      setEvents((items) => [makeEvent(`Transaction failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Audit failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
     }
   }
 
@@ -135,13 +135,13 @@ export default function App() {
       return;
     }
     setTxState('pending');
-    setEvents((items) => [makeEvent(`Invoking Soroban contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
+    setEvents((items) => [makeEvent(`Invoking Payment Tracker Soroban Contract at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
     try {
       const hash = await invokeContract(publicKey, 'initialize');
       setTxHash(hash);
       setTxState('success');
-      setEvents((items) => [makeEvent(`Soroban contract call executed successfully. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
+      setEvents((items) => [makeEvent(`Payment Tracker contract call executed. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
     } catch (err: any) {
       setTxState('fail');
       setEvents((items) => [makeEvent(`Contract call failed: ${err.message ?? err}`), ...items.slice(0, 7)]);
@@ -149,15 +149,16 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans">
+    <div className="min-h-screen bg-stone-950 text-amber-50 flex font-mono relative">
       
-      <aside className="w-72 bg-slate-900 border-r border-slate-800 p-6 flex flex-col justify-between shrink-0">
+      {/* Sidebar */}
+      <aside className="w-72 bg-stone-900 border-r border-amber-900/40 p-6 flex flex-col justify-between shrink-0">
         <div className="flex flex-col gap-8">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">📜</span>
+            <span className="text-3xl p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">📜</span>
             <div>
-              <h1 className="font-bold text-xl text-white">LedgerTrack</h1>
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-mono">Control Center</span>
+              <h1 className="font-bold text-xl text-amber-400 tracking-wider font-sans">{project.short}</h1>
+              <span className="text-[10px] uppercase tracking-widest text-amber-500/80 font-mono">Gold Audit Terminal</span>
             </div>
           </div>
 
@@ -168,8 +169,8 @@ export default function App() {
                 onClick={() => setPage(p.id)}
                 className={`w-full px-4 py-3 rounded-xl text-xs font-semibold tracking-wider text-left transition-all ${
                   page === p.id 
-                    ? 'bg-slate-800 text-white border-l-4 border-emerald-500 shadow-md' 
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-amber-950/80 text-amber-300 border-l-4 border-amber-500 shadow-md' 
+                    : 'text-stone-400 hover:text-amber-200 hover:bg-stone-800/50'
                 }`}
               >
                 {p.label}
@@ -178,27 +179,27 @@ export default function App() {
           </nav>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-2 text-xs">
-          <span className="text-slate-400 uppercase font-mono text-[10px]">Stellar Testnet</span>
-          <span className="font-mono text-emerald-400 truncate">{shortKey}</span>
+        <div className="p-4 rounded-xl bg-stone-950 border border-amber-900/40 flex flex-col gap-2 text-xs">
+          <span className="text-amber-400 uppercase text-[10px]">Stellar Testnet Node</span>
+          <span className="font-mono text-amber-200 truncate">{shortKey}</span>
         </div>
       </aside>
 
+      {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-4xl mx-auto flex flex-col gap-8">
           
-          <header className="flex items-center justify-between pb-6 border-b border-slate-800">
+          <header className="flex items-center justify-between pb-6 border-b border-amber-900/30">
             <div>
-              <h2 className="text-2xl font-bold text-white capitalize">{page.replace('_', ' ')}</h2>
-              <p className="text-xs text-slate-400 mt-1">Immutable Payment Tracking & Invoicing</p>
+              <h2 className="text-2xl font-bold text-amber-400 capitalize font-sans">{page.replace('_', ' ')}</h2>
+              <p className="text-xs text-stone-400 mt-1">{project.useCase}</p>
             </div>
             
             <div className="flex items-center gap-3">
               {!publicKey ? (
                 <button
                   onClick={() => connectWallet('freighter')}
-                  className="px-5 py-2.5 rounded-xl text-white font-semibold text-xs transition-all shadow-lg"
-                  style={{ backgroundColor: '#d97706' }}
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs transition-all shadow-lg shadow-amber-950/50 font-sans"
                 >
                   Connect Multi-Wallet
                 </button>
@@ -214,100 +215,111 @@ export default function App() {
           </header>
 
           {error && (
-            <div className="p-4 rounded-xl bg-red-950/40 border border-red-500/40 text-red-300 text-xs flex flex-col gap-1">
+            <div className="p-4 rounded-xl bg-red-950/50 border border-red-500/40 text-red-300 text-xs flex flex-col gap-1">
               <span className="font-bold">Error Condition Triggered: {error}</span>
               <span>{errorCopy(error)}</span>
             </div>
           )}
 
           {page === 'overview' && (
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl">
-                <span className="text-xs text-slate-400 uppercase tracking-widest font-mono">Connected Balance</span>
-                <div className="text-3xl font-bold text-white mt-2 font-mono">{balance} XLM</div>
+            <div className="flex flex-col gap-6">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <div className="p-6 bg-stone-900 border border-amber-900/30 rounded-2xl">
+                  <span className="text-xs text-stone-400 uppercase tracking-widest">Audited XLM Balance</span>
+                  <div className="text-3xl font-bold text-amber-400 mt-2">{balance} XLM</div>
+                </div>
+
+                <div className="p-6 bg-stone-900 border border-amber-900/30 rounded-2xl">
+                  <span className="text-xs text-stone-400 uppercase tracking-widest">Deployed Contract ID</span>
+                  <div className="text-xs text-amber-300 mt-2 break-all">{contractAddress}</div>
+                </div>
               </div>
 
-              <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl">
-                <span className="text-xs text-slate-400 uppercase tracking-widest font-mono">Deployed Contract ID</span>
-                <div className="text-xs font-mono text-emerald-400 mt-2 break-all">{contractAddress}</div>
+              {/* Gold Ticker Banner */}
+              <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-500/30 flex items-center justify-between text-xs text-amber-300">
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping"></span>
+                  Audit Ledger Integrity Certified
+                </span>
+                <span className="text-stone-400">Block Sync: Horizon Testnet</span>
               </div>
             </div>
           )}
 
           {page === 'wallets' && (
             <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Select Wallet Gateway</h3>
+              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider font-sans">Select Wallet Gateway</h3>
               <div className="grid sm:grid-cols-2 gap-4">
                 {walletOptions.map((w) => (
                   <button
                     key={w.id}
                     onClick={() => connectWallet(w.id)}
-                    className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 transition-all flex items-center gap-4 text-left"
+                    className="p-5 rounded-2xl bg-stone-900 border border-amber-900/30 hover:border-amber-400 transition-all flex items-center gap-4 text-left"
                   >
                     <span className="text-2xl">{w.icon}</span>
                     <div>
-                      <div className="font-bold text-white text-sm">{w.label}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">{w.note}</div>
+                      <div className="font-bold text-amber-200 text-sm font-sans">{w.label}</div>
+                      <div className="text-xs text-stone-400 mt-0.5">{w.note}</div>
                     </div>
                   </button>
                 ))}
               </div>
 
-              <div className="mt-4 p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col gap-2">
-                <span className="text-xs font-bold text-slate-400 uppercase">Simulate Error Handlers</span>
+              <div className="mt-4 p-4 rounded-xl bg-stone-900 border border-stone-800 flex flex-col gap-2">
+                <span className="text-xs font-bold text-stone-400 uppercase font-sans">Simulate Error Handlers</span>
                 <div className="flex gap-2">
-                  <button onClick={() => simulateError('WalletNotFound')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">WalletNotFound</button>
-                  <button onClick={() => simulateError('WalletConnectionRejected')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">WalletConnectionRejected</button>
-                  <button onClick={() => simulateError('InsufficientBalance')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">InsufficientBalance</button>
+                  <button onClick={() => simulateError('WalletNotFound')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">WalletNotFound</button>
+                  <button onClick={() => simulateError('WalletConnectionRejected')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">WalletConnectionRejected</button>
+                  <button onClick={() => simulateError('InsufficientBalance')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">InsufficientBalance</button>
                 </div>
               </div>
             </div>
           )}
 
           {page === 'transfer' && (
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Record Payment Audit</h3>
+            <div className="p-6 bg-stone-900 border border-amber-900/30 rounded-2xl flex flex-col gap-4">
+              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider font-sans">{project.action}</h3>
               <div>
-                <label className="text-xs text-slate-400 block mb-1">Destination Address</label>
-                <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm font-mono text-slate-200" />
+                <label className="text-xs text-stone-400 block mb-1">Destination Address</label>
+                <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-amber-900/30 text-sm text-amber-200" />
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Amount (XLM)</label>
-                  <input type="text" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm font-mono text-slate-200" />
+                  <label className="text-xs text-stone-400 block mb-1">Audit Amount (XLM)</label>
+                  <input type="text" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-amber-900/30 text-sm text-amber-200" />
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 block mb-1">Memo</label>
-                  <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm font-mono text-slate-200" />
+                  <label className="text-xs text-stone-400 block mb-1">Audit Hash / Memo</label>
+                  <input type="text" value={memo} onChange={(e) => setMemo(e.target.value)} className="w-full px-4 py-2.5 rounded-xl bg-stone-950 border border-amber-900/30 text-sm text-amber-200" />
                 </div>
               </div>
-              <button onClick={handleTransfer} disabled={txState === 'pending'} className="mt-2 py-3 rounded-xl text-white font-bold text-xs tracking-wide" style={{ backgroundColor: '#d97706' }}>
-                {txState === 'pending' ? 'Processing...' : 'Execute Operation'}
+              <button onClick={handleTransfer} disabled={txState === 'pending'} className="mt-2 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs tracking-wide font-sans">
+                {txState === 'pending' ? 'Recording Audit...' : 'Execute Payment Audit'}
               </button>
             </div>
           )}
 
           {page === 'contract' && (
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Payment Tracker Smart Contract</h3>
-              <p className="text-xs text-slate-400">Deployed Soroban Smart Contract on Stellar Testnet.</p>
-              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-400">
+            <div className="p-6 bg-stone-900 border border-amber-900/30 rounded-2xl flex flex-col gap-4">
+              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider font-sans">{project.contract}</h3>
+              <p className="text-xs text-stone-400">Deployed Soroban Smart Contract on Stellar Testnet.</p>
+              <div className="p-4 rounded-xl bg-stone-950 border border-amber-900/40 text-xs text-amber-300">
                 Contract ID: {contractAddress}
               </div>
-              <button onClick={callContract} disabled={txState === 'pending'} className="py-3 rounded-xl text-white font-bold text-xs" style={{ backgroundColor: '#d97706' }}>
+              <button onClick={callContract} disabled={txState === 'pending'} className="py-3 rounded-xl bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-stone-950 font-bold text-xs font-sans">
                 {txState === 'pending' ? 'Invoking Soroban RPC...' : 'Invoke Smart Contract (initialize)'}
               </button>
             </div>
           )}
 
           {page === 'events' && (
-            <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col gap-4">
-              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider">Event Subscription Ledger</h3>
+            <div className="p-6 bg-stone-900 border border-amber-900/30 rounded-2xl flex flex-col gap-4">
+              <h3 className="text-sm font-bold text-amber-400 uppercase tracking-wider font-sans">Event Subscription Ledger</h3>
               <div className="flex flex-col gap-2">
                 {events.map((e) => (
-                  <div key={e.id} className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center text-xs font-mono">
-                    <span className="text-slate-300">{e.label}</span>
-                    <span className="text-slate-500">{e.time}</span>
+                  <div key={e.id} className="p-3 rounded-xl bg-stone-950 border border-amber-900/30 flex justify-between items-center text-xs">
+                    <span className="text-amber-200">{e.label}</span>
+                    <span className="text-stone-500">{e.time}</span>
                   </div>
                 ))}
               </div>
@@ -315,9 +327,9 @@ export default function App() {
           )}
 
           {txHash && (
-            <div className="p-4 rounded-xl bg-emerald-950/50 border border-emerald-500/30 flex flex-col gap-1 text-xs">
-              <span className="font-bold text-emerald-400 uppercase tracking-wider">Transaction Confirmed</span>
-              <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" rel="noreferrer" className="font-mono text-emerald-300 hover:underline break-all">
+            <div className="p-4 rounded-xl bg-amber-950/60 border border-amber-500/40 flex flex-col gap-1 text-xs">
+              <span className="font-bold text-amber-400 uppercase tracking-wider font-sans">Transaction Confirmed</span>
+              <a href={`https://stellar.expert/explorer/testnet/tx/${txHash}`} target="_blank" rel="noreferrer" className="text-amber-300 hover:underline break-all">
                 {txHash}
               </a>
             </div>
