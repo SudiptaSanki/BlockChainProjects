@@ -206,7 +206,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col md:flex-row font-sans relative overflow-x-hidden md:overflow-hidden">
       
       {/* Light Sidebar */}
       <aside className="w-full md:w-72 bg-white border-b md:border-b-0 md:border-r border-slate-200 p-6 flex flex-col justify-between shrink-0 shadow-sm">
