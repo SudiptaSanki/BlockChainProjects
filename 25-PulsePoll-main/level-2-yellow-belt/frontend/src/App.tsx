@@ -37,7 +37,7 @@ type WalletError = 'WalletNotFound' | 'WalletConnectionRejected' | 'Insufficient
 function errorCopy(error: WalletError) {
   const copy: Record<WalletError, string> = {
     WalletNotFound: 'Wallet extension not detected. Please install the extension or ensure it is enabled.',
-    WalletConnectionRejected: 'Connection rejected. Please grant permissions inside the wallet prompt.',
+    WalletConnectionRejected: 'Action failed. Check the Event Ledger below for details. Open browser console (F12) for full error.',
     InsufficientBalance: 'Insufficient Testnet balance to cover network fees or execution requirements.',
   };
   return copy[error];
@@ -131,9 +131,9 @@ export default function App() {
           const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
           const account = await response.json();
           const native = account.balances?.find((b: any) => b.asset_type === 'native');
-          setBalance(native?.balance ?? '10000.0000000');
+          persistBalance(native?.balance ?? '10000.0000000');
         } catch {
-          setBalance('10000.0000000');
+          persistBalance('10000.0000000');
         }
       },
       (err) => {
