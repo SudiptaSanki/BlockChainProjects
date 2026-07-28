@@ -126,7 +126,7 @@ export default function App() {
       (err) => {
         setTxState('fail');
         setError('WalletConnectionRejected');
-        setEvents((items) => [makeEvent(`Failed link ${walletId}: WalletConnectionRejected`), ...items.slice(0, 7)]);
+        setEvents((items) => [makeEvent(`Failed link: ${(err as any)?.message || 'Wallet not accessible'}`), ...items.slice(0, 7)]);
       }
     );
   }
@@ -235,10 +235,10 @@ export default function App() {
             <div className="flex items-center gap-3">
               {!publicKey ? (
                 <button
-                  onClick={() => connectWallet('freighter')}
+                  onClick={() => setPage('wallets')}
                   className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs transition-all shadow-lg shadow-amber-950/50 font-sans"
                 >
-                  Connect Multi-Wallet
+                  Connect Wallet →
                 </button>
               ) : (
                 <button
