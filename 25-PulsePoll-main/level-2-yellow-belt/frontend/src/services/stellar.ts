@@ -1,11 +1,35 @@
 import * as StellarSdk from '@stellar/stellar-sdk';
-import { kit } from './freighter';
-import { Networks } from '@creit.tech/stellar-wallets-kit';
+import * as FreighterApi from '@stellar/freighter-api';
 
 export const CONTRACT_ID = 'CC2UJP6YAUW5WXAYOM2227FUYHPY5S2IXMSMC65SVLF6ZHOAVFKVBTDH';
 export const NETWORK_PASSPHRASE = StellarSdk.Networks.TESTNET;
 export const HORIZON_URL = 'https://horizon-testnet.stellar.org';
 export const SOROBAN_RPC_URL = 'https://soroban-testnet.stellar.org';
+
+async function signWithFreighter(xdr: string, publicKey: string): Promise<string> {
+  const f = FreighterApi as any;
+  
+  // Try signTransaction (most common method)
+  if (f.signTransaction) {
+    try {
+      const result = await f.signTransaction(xdr, {
+        networkPassphrase: StellarSdk.Networks.TESTNET,
+        accountToSign: publicKey,
+      });
+      return typeof result === 'string' ? result : result?.signedTxXdr || result?.signedXDR || result;
+    } catch (e) {
+      console.error('signTransaction failed:', e);
+    }
+  }
+
+  // Fallback: signAuthEntry or other methods
+  if (f.sign) {
+    const result = await f.sign(xdr);
+    return typeof result === 'string' ? result : result?.signedTxXdr || result;
+  }
+
+  throw new Error('Freighter signTransaction not available. Please ensure Freighter extension is active.');
+}
 
 export async function submitPayment(publicKey: string, destination: string, amount: string, memo: string) {
   const server = new StellarSdk.Horizon.Server(HORIZON_URL);
@@ -27,14 +51,7 @@ export async function submitPayment(publicKey: string, destination: string, amou
   }
 
   const transaction = builder.setTimeout(60).build();
-
-  const signedResult = await kit.signTx({
-    xdr: transaction.toXDR(),
-    publicKey: publicKey,
-    network: Networks.TESTNET,
-  });
-
-  const signedTxXdr = (signedResult as any).signedTxXdr || (signedResult as any).signedXDR || signedResult;
+  const signedTxXdr = await signWithFreighter(transaction.toXDR(), publicKey);
   const signedTransaction = new StellarSdk.Transaction(signedTxXdr, NETWORK_PASSPHRASE);
   const submitted = await server.submitTransaction(signedTransaction);
   return submitted.hash;
@@ -65,14 +82,7 @@ export async function invokeContract(
   }
 
   const assembledTx = StellarSdk.rpc.assembleTransaction(tx, simulated).build();
-
-  const signedResult = await kit.signTx({
-    xdr: assembledTx.toXDR(),
-    publicKey: publicKey,
-    network: Networks.TESTNET,
-  });
-
-  const signedTxXdr = (signedResult as any).signedTxXdr || (signedResult as any).signedXDR || signedResult;
+  const signedTxXdr = await signWithFreighter(assembledTx.toXDR(), publicKey);
   const signedTx = new StellarSdk.Transaction(signedTxXdr, NETWORK_PASSPHRASE);
 
   const sendResult = await rpcClient.sendTransaction(signedTx);
@@ -81,9 +91,11 @@ export async function invokeContract(
   }
 
   let statusResult = await rpcClient.getTransaction(sendResult.hash);
-  while (statusResult.status === 'NOT_FOUND') {
+  let attempts = 0;
+  while (statusResult.status === 'NOT_FOUND' && attempts < 15) {
     await new Promise((resolve) => setTimeout(resolve, 2000));
     statusResult = await rpcClient.getTransaction(sendResult.hash);
+    attempts++;
   }
 
   if (statusResult.status === 'FAILED') {
