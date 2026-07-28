@@ -164,8 +164,9 @@ export default function App() {
   }
 
   async function handleTransfer() {
-    if (!publicKey) {
-      simulateError('WalletConnectionRejected');
+    const stellarKey = connectedWallets['freighter'] || publicKey;
+    if (!stellarKey || !stellarKey.startsWith('G')) {
+      setPage('wallets');
       return;
     }
     setTxState('pending');
@@ -185,8 +186,9 @@ export default function App() {
 
   async function callContract() {
     setError('');
-    if (!publicKey) {
-      simulateError('WalletConnectionRejected');
+    const stellarKey = connectedWallets['freighter'] || publicKey;
+    if (!stellarKey || !stellarKey.startsWith('G')) {
+      setPage('wallets');
       return;
     }
     setTxState('pending');
