@@ -329,7 +329,7 @@ export default function App() {
                           <div className="font-bold text-white text-sm">{w.label}</div>
                           <div className="text-xs text-slate-400 mt-0.5">{w.note}</div>
                           {isConnected && (
-                            <div className="text-[11px] font-mono text-cyan-300 mt-1 truncate max-w-[180px]">
+                            <div className="text-[11px] font-mono text-cyan-300 mt-1 truncate max-w-[120px] sm:max-w-[180px]">
                               {walletAddr}
                             </div>
                           )}
@@ -354,7 +354,7 @@ export default function App() {
 
               <div className="mt-4 p-4 rounded-xl bg-slate-900/60 border border-indigo-900 flex flex-col gap-2">
                 <span className="text-xs font-bold text-indigo-300/70 uppercase">Simulate Error Handlers</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button onClick={() => simulateError('WalletNotFound')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-indigo-200 border border-indigo-700">WalletNotFound</button>
                   <button onClick={() => simulateError('WalletConnectionRejected')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-indigo-200 border border-indigo-700">WalletConnectionRejected</button>
                   <button onClick={() => simulateError('InsufficientBalance')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-indigo-200 border border-indigo-700">InsufficientBalance</button>
