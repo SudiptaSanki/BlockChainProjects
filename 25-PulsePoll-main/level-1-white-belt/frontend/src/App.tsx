@@ -109,8 +109,8 @@ export default function App() {
               {state === 'connecting' ? 'Connecting...' : 'Connect Freighter'}
             </button>
           ) : (
-            <div className="flex items-center gap-3">
-              <span className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto overflow-hidden">
+              <span className="text-xs px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono truncate max-w-full">
                 {publicKey.slice(0, 6)}...{publicKey.slice(-6)}
               </span>
               <button
@@ -140,7 +140,7 @@ export default function App() {
                 {balance} <span className="text-base font-normal text-slate-400">XLM</span>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleRefreshBalance}
                 disabled={!publicKey || state === 'loading'}
