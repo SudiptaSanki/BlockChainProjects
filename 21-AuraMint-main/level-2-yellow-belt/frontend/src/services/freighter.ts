@@ -2,11 +2,13 @@ import {
   StellarWalletsKit,
   Networks,
 } from '@creit.tech/stellar-wallets-kit';
+import { FreighterModule } from '@creit.tech/stellar-wallets-kit/modules/freighter';
 import * as FreighterApi from '@stellar/freighter-api';
 
 export const kit = new StellarWalletsKit({
   network: Networks.TESTNET,
   selectedWalletId: 'freighter',
+  modules: [new FreighterModule()],
 });
 
 export async function connectWalletKit(
@@ -30,6 +32,7 @@ export async function connectWalletKit(
     }
 
     if (key) {
+      kit.setWallet('freighter');
       onWalletSelected('freighter', key);
       return;
     }
