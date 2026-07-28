@@ -59,7 +59,7 @@ export default function App() {
   const [error, setError] = useState<WalletError | ''>('');
   const [contractAddress] = useState(project.contractId);
   const [txHash, setTxHash] = useState('');
-  const [destination, setDestination] = useState('GBRPYHIL2CI3FNQ4BXLFMNDLFWPU2HY4LNSXYTWRAA36REDWBYV3P5BY');
+  const [destination, setDestination] = useState('');
   const [amount, setAmount] = useState('100');
   const [memo, setMemo] = useState('AuraMint NFT');
   const [events, setEvents] = useState([
@@ -132,11 +132,15 @@ export default function App() {
         
         try {
           const response = await fetch(`${HORIZON_URL}/accounts/${key}`);
-          const account = await response.json();
-          const native = account.balances?.find((b: any) => b.asset_type === 'native');
-          persistBalance(native?.balance ?? '10000.0000000');
+          if (response.ok) {
+            const account = await response.json();
+            const native = account.balances?.find((b: any) => b.asset_type === 'native');
+            persistBalance(native?.balance ?? '0.0000000');
+          } else {
+            persistBalance('0.0000000');
+          }
         } catch {
-          persistBalance('10000.0000000');
+          persistBalance('0.0000000');
         }
       },
       (err) => {
@@ -163,7 +167,10 @@ export default function App() {
   }
 
   async function handleTransfer() {
-    if (!publicKey) {
+    const stellarKey = connectedWallets['freighter'] || publicKey;
+    if (!stellarKey || !stellarKey.startsWith('G')) {
+      setError('WalletNotFound');
+      setEvents((items) => [makeEvent('Please connect Freighter wallet first to send Stellar transactions.'), ...items.slice(0, 7)]);
       setPage('wallets');
       return;
     }
@@ -172,7 +179,7 @@ export default function App() {
     setEvents((items) => [makeEvent(`Minting NFT with ${amount} XLM collateral...`), ...items.slice(0, 7)]);
 
     try {
-      const hash = await submitPayment(publicKey, destination.trim(), amount.trim(), memo);
+      const hash = await submitPayment(stellarKey, destination.trim(), amount.trim(), memo);
       setTxHash(hash);
       setTxState('success');
       setEvents((items) => [makeEvent(`NFT Minted on-chain. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
@@ -187,7 +194,10 @@ export default function App() {
 
   async function callContract() {
     setError('');
-    if (!publicKey) {
+    const stellarKey = connectedWallets['freighter'] || publicKey;
+    if (!stellarKey || !stellarKey.startsWith('G')) {
+      setError('WalletNotFound');
+      setEvents((items) => [makeEvent('Please connect Freighter wallet first for contract calls.'), ...items.slice(0, 7)]);
       setPage('wallets');
       return;
     }
@@ -195,7 +205,7 @@ export default function App() {
     setEvents((items) => [makeEvent(`Invoking Soroban NFT Minter at ${contractAddress.slice(0, 8)}...`), ...items.slice(0, 7)]);
     
     try {
-      const hash = await invokeContract(publicKey, 'initialize');
+      const hash = await invokeContract(stellarKey, 'initialize');
       setTxHash(hash);
       setTxState('success');
       setEvents((items) => [makeEvent(`NFT Minter contract call executed. Tx: ${hash.slice(0, 8)}...`), ...items.slice(0, 7)]);
