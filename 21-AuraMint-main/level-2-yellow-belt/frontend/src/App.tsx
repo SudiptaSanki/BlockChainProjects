@@ -51,9 +51,10 @@ function makeEvent(label: string) {
 export default function App() {
   const [page, setPage] = useState<PageId>('overview');
   const [selectedWallet, setSelectedWallet] = useState('freighter');
-  const [publicKey, setPublicKey] = useState('');
+  const [publicKey, setPublicKey] = useState(() => localStorage.getItem('stellarPublicKey') || '');
+  const [balance, setBalanceState] = useState(() => localStorage.getItem('stellarBalance') || '0.0000000');
   const [connectedWallets, setConnectedWallets] = useState<Record<string, string>>({});
-  const [balance, setBalance] = useState('0.0000000');
+
   const [txState, setTxState] = useState<TxState>('idle');
   const [error, setError] = useState<WalletError | ''>('');
   const [contractAddress] = useState(project.contractId);
@@ -68,6 +69,18 @@ export default function App() {
 
   const shortKey = publicKey ? `${publicKey.slice(0, 6)}...${publicKey.slice(-6)}` : 'Disconnected';
 
+  function persistPublicKey(key: string) {
+    setPublicKey(key);
+    if (key) localStorage.setItem('stellarPublicKey', key);
+    else localStorage.removeItem('stellarPublicKey');
+  }
+
+  function persistBalance(bal: string) {
+    setBalanceState(bal);
+    localStorage.setItem('stellarBalance', bal);
+  }
+
+
   async function connectWallet(walletId = selectedWallet) {
     setSelectedWallet(walletId);
     setTxState('connecting');
@@ -79,7 +92,7 @@ export default function App() {
         if (win.ethereum) {
           const accounts = await win.ethereum.request({ method: 'eth_requestAccounts' });
           const ethKey = accounts[0] || '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-          setPublicKey(ethKey);
+          persistPublicKey(ethKey);
           setConnectedWallets((prev) => ({ ...prev, metamask: ethKey }));
           setTxState('success');
           setEvents((items) => [makeEvent(`METAMASK linked: ${ethKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
@@ -87,7 +100,7 @@ export default function App() {
         } else {
           // Mock connection for demonstration if extension not installed
           const mockEthKey = '0x71C7656EC7ab88b098defB751B7401B5f6d8976F';
-          setPublicKey(mockEthKey);
+          persistPublicKey(mockEthKey);
           setConnectedWallets((prev) => ({ ...prev, metamask: mockEthKey }));
           setTxState('success');
           setEvents((items) => [makeEvent(`METAMASK linked: ${mockEthKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
@@ -102,7 +115,7 @@ export default function App() {
 
     if (walletId === 'xbull' || walletId === 'lobstr') {
       const mockKey = walletId === 'xbull' ? 'GXBULL88734KSMCN9283746501928374615' : 'GLOBSTR3394857601928374650192837';
-      setPublicKey(mockKey);
+      persistPublicKey(mockKey);
       setConnectedWallets((prev) => ({ ...prev, [walletId]: mockKey }));
       setTxState('success');
       setEvents((items) => [makeEvent(`${walletId.toUpperCase()} linked: ${mockKey.slice(0, 8)}...`), ...items.slice(0, 7)]);
@@ -112,7 +125,7 @@ export default function App() {
     // Default Freighter logic
     await connectWalletKit(
       async (id, key) => {
-        setPublicKey(key);
+        persistPublicKey(key);
         setConnectedWallets((prev) => ({ ...prev, [id]: key }));
         setTxState('success');
         setEvents((items) => [makeEvent(`${id.toUpperCase()} linked: ${key.slice(0, 8)}...`), ...items.slice(0, 7)]);
@@ -135,8 +148,9 @@ export default function App() {
   }
 
   function disconnectWallet() {
-    setPublicKey('');
-    setBalance('0.0000000');
+    persistPublicKey('');
+    setBalanceState('0.0000000');
+    localStorage.removeItem('stellarBalance');
     setConnectedWallets({});
     setTxState('idle');
     setEvents((items) => [makeEvent('Wallets unlinked'), ...items.slice(0, 7)]);
@@ -150,7 +164,7 @@ export default function App() {
 
   async function handleTransfer() {
     if (!publicKey) {
-      simulateError('WalletConnectionRejected');
+      setPage('wallets');
       return;
     }
     setTxState('pending');
@@ -171,7 +185,7 @@ export default function App() {
   async function callContract() {
     setError('');
     if (!publicKey) {
-      simulateError('WalletConnectionRejected');
+      setPage('wallets');
       return;
     }
     setTxState('pending');
