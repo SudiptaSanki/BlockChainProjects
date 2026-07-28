@@ -126,7 +126,7 @@ export default function App() {
       (err) => {
         setTxState('fail');
         setError('WalletConnectionRejected');
-        setEvents((items) => [makeEvent(`Failed link ${walletId}: WalletConnectionRejected`), ...items.slice(0, 7)]);
+        setEvents((items) => [makeEvent(`Failed link: ${(err as any)?.message || 'Wallet not accessible'}`), ...items.slice(0, 7)]);
       }
     );
   }
@@ -232,7 +232,7 @@ export default function App() {
 
           {!publicKey ? (
             <button
-              onClick={() => connectWallet('freighter')}
+              onClick={() => setPage('wallets')}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold text-xs transition-all shadow-lg shadow-indigo-950/50"
             >
               Connect Multi-Wallet
