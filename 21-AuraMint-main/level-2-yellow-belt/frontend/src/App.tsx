@@ -189,14 +189,14 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row font-sans relative overflow-x-hidden md:overflow-hidden">
       
       {/* Animated Glowing Ambient Blobs */}
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-600/20 rounded-full blur-3xl animate-pulse"></div>
       <div className="absolute top-1/2 -right-32 w-96 h-96 bg-teal-600/15 rounded-full blur-3xl animate-pulse"></div>
 
       {/* Sidebar */}
-      <aside className="w-72 bg-slate-900/90 border-r border-emerald-900/40 p-6 flex flex-col justify-between shrink-0 backdrop-blur-md z-10">
+      <aside className="w-full md:w-72 bg-slate-900/90 border-b md:border-b-0 md:border-r border-emerald-900/40 p-4 md:p-6 flex flex-col justify-between shrink-0 backdrop-blur-md z-10">
         <div className="flex flex-col gap-8">
           <div className="flex items-center gap-3">
             <span className="text-3xl p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">✨</span>
@@ -227,7 +227,7 @@ export default function App() {
           <span className="text-emerald-400 uppercase font-mono text-[10px] flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Stellar Testnet
           </span>
-          <span className="font-mono text-slate-300 truncate">{shortKey}</span>
+          <span className="font-mono text-slate-300 truncate max-w-full">{shortKey}</span>
         </div>
       </aside>
 
@@ -235,7 +235,7 @@ export default function App() {
       <main className="flex-1 p-8 overflow-y-auto z-10">
         <div className="max-w-4xl mx-auto flex flex-col gap-8">
           
-          <header className="flex items-center justify-between pb-6 border-b border-emerald-900/30">
+          <header className="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 gap-4 border-b border-emerald-900/30">
             <div>
               <h2 className="text-2xl font-bold text-white capitalize">{page.replace('_', ' ')}</h2>
               <p className="text-xs text-slate-400 mt-1">{project.useCase}</p>
@@ -322,7 +322,7 @@ export default function App() {
                           <div className="font-bold text-white text-sm">{w.label}</div>
                           <div className="text-xs text-slate-400 mt-0.5">{w.note}</div>
                           {isConnected && (
-                            <div className="text-[11px] font-mono text-emerald-300 mt-1 truncate max-w-[180px]">
+                            <div className="text-[11px] font-mono text-emerald-300 mt-1 truncate max-w-[120px] sm:max-w-[180px]">
                               {walletAddr}
                             </div>
                           )}
@@ -347,7 +347,7 @@ export default function App() {
 
               <div className="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex flex-col gap-2">
                 <span className="text-xs font-bold text-slate-400 uppercase">Simulate Error Handlers</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button onClick={() => simulateError('WalletNotFound')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">WalletNotFound</button>
                   <button onClick={() => simulateError('WalletConnectionRejected')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">WalletConnectionRejected</button>
                   <button onClick={() => simulateError('InsufficientBalance')} className="px-3 py-1.5 rounded-lg bg-slate-800 text-xs text-slate-300 border border-slate-700">InsufficientBalance</button>
