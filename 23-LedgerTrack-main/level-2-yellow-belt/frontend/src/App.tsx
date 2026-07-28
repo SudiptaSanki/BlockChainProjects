@@ -189,7 +189,7 @@ export default function App() {
     <div className="min-h-screen bg-stone-950 text-amber-50 flex font-mono relative">
       
       {/* Sidebar */}
-      <aside className="w-72 bg-stone-900 border-r border-amber-900/40 p-6 flex flex-col justify-between shrink-0">
+      <aside className="w-full md:w-72 bg-stone-900 border-b md:border-b-0 md:border-r border-amber-900/40 p-6 flex flex-col justify-between shrink-0">
         <div className="flex flex-col gap-8">
           <div className="flex items-center gap-3">
             <span className="text-3xl p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">📜</span>
@@ -226,7 +226,7 @@ export default function App() {
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-4xl mx-auto flex flex-col gap-8">
           
-          <header className="flex items-center justify-between pb-6 border-b border-amber-900/30">
+          <header className="flex flex-col md:flex-row items-start md:items-center justify-between pb-6 gap-4 border-b border-amber-900/30">
             <div>
               <h2 className="text-2xl font-bold text-amber-400 capitalize font-sans">{page.replace('_', ' ')}</h2>
               <p className="text-xs text-stone-400 mt-1">{project.useCase}</p>
@@ -306,7 +306,7 @@ export default function App() {
                           <div className="font-bold text-amber-200 text-sm font-sans">{w.label}</div>
                           <div className="text-xs text-stone-400 mt-0.5">{w.note}</div>
                           {isConnected && (
-                            <div className="text-[11px] font-mono text-amber-300 mt-1 truncate max-w-[180px]">
+                            <div className="text-[11px] font-mono text-amber-300 mt-1 truncate max-w-[120px] sm:max-w-[180px]">
                               {walletAddr}
                             </div>
                           )}
@@ -331,7 +331,7 @@ export default function App() {
 
               <div className="mt-4 p-4 rounded-xl bg-stone-900 border border-stone-800 flex flex-col gap-2">
                 <span className="text-xs font-bold text-stone-400 uppercase font-sans">Simulate Error Handlers</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <button onClick={() => simulateError('WalletNotFound')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">WalletNotFound</button>
                   <button onClick={() => simulateError('WalletConnectionRejected')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">WalletConnectionRejected</button>
                   <button onClick={() => simulateError('InsufficientBalance')} className="px-3 py-1.5 rounded-lg bg-stone-800 text-xs text-amber-200 border border-stone-700">InsufficientBalance</button>
